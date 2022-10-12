@@ -9,8 +9,6 @@ SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 700
 SCREEN_TITLE = "Galaga"
 
-MOVEMENT_SPEED = 5
-
 level = 5
 
 # **** the amount of each enemy type per level can be changed here
