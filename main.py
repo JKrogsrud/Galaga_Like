@@ -97,6 +97,12 @@ class MyGame(arcade.Window):
         For a full list of keys, see:
         https://api.arcade.academy/en/latest/arcade.key.html
         """
+        if key == 32:
+            bullet = Bullet('blue_laser.png', damage=1)
+            bullet.center_y = 0
+            bullet.center_x = 200
+            bullet.change_y = 5
+            self.enemy_bullet_list.append(bullet)
         pass
 
     def on_key_release(self, key, key_modifiers):
