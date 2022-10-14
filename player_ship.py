@@ -43,9 +43,11 @@ class MyGame(arcade.Window):
         self.snowflake_list = None
 
         #Loads a file and creates a shader from it
-        shader_file_path = "circle_1.glsl"
+        """shader_file_path1 = "circle_1.glsl"
+        shader_file_path2 = "Purple.glsl"""
         window_size = self.get_size()
-        self.shadertoy = Shadertoy.create_from_file(window_size, shader_file_path)
+        self.shadertoy = Shadertoy.create_from_file(window_size, "circle_1.glsl")
+        self.shadertoy = Shadertoy.create_from_file(window_size, "Purlple.glsl")
 
     def start_snowfall(self):
         """ Set up snowfall and initialize variables. """
@@ -73,26 +75,15 @@ class MyGame(arcade.Window):
         # Set the background color
         arcade.set_background_color(arcade.color.BLACK)
 
-    """ def setup(self):
-        self.background = arcade.load_texture("circle_1.jpeg")"""
-
     def on_draw(self):
         """ Render the screen. """
 
         # This command is necessary before drawing
         self.clear()
 
-        # Draws in the background
-        """arcade.draw_texture_rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)"""
-
         # Run the GLSL code
         self.shadertoy.render()
-
-        # Draw the moon
-        x = 500
-        y = 400
-        radius = 70
-        arcade.draw_circle_filled(x, y, radius, arcade.color.WHITE_SMOKE)
+        self.shadertoy.render()
 
         # Draw the current position of each snowflake
         for snowflake in self.snowflake_list:
