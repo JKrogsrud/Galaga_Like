@@ -10,8 +10,9 @@ python -m arcade.examples.starting_template
 import arcade
 from bullet import Bullet
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 500
+SCREEN_HEIGHT = 700
+ENEMY_SPRITE_SCALING = .0375
 SCREEN_TITLE = "Galaga"
 
 
@@ -36,6 +37,8 @@ class MyGame(arcade.Window):
         self.enemy_bullet_list = None
         self.player_list = None
         self.player_bullet_list = None
+        self.background_list = None
+
 
 
     def setup(self):
@@ -46,6 +49,7 @@ class MyGame(arcade.Window):
         self.enemy_bullet_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.player_bullet_list = arcade.SpriteList()
+        self.background_list = arcade.SpriteList()
 
         # Test Bullet
         bullet = Bullet('blue_laser.png', damage=1)

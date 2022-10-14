@@ -20,6 +20,11 @@ class Weapon():
         # Create Bullet object
         if self.ammo > 0 or not self.requires_ammo:  # Ammo available or not needed
             bullet = self.bullet_type
+            bullet.center_x = x_loc
+            bullet.center_y = y_loc
+
+            # Set velocity of the of the bullet and set the correct orientation of image
+
             if self.requires_ammo:  # If ammo required subtract 1 from ammo
                 self.ammo -= 1
         else:
