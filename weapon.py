@@ -9,7 +9,7 @@ It should know where the player / enemy sprite is so pass in those lcoations
 
 
 class Weapon():
-    def __init__(self, image, friendly=True, requires_ammo=False, ammo=100, bullet_type=Bullet()):
+    def __init__(self, image=None, friendly=True, requires_ammo=False, ammo=100, bullet_type=Bullet()):
         self.image = image
         self.requires_ammo = requires_ammo
         self.ammo = ammo

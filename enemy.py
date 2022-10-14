@@ -1,6 +1,9 @@
 import arcade
 from weapon import Weapon
 
+SCREEN_WIDTH = 500
+SCREEN_HEIGHT = 700
+
 class Enemy(arcade.Sprite):
     def __init__(self, filename="Enemy_1.png", weapon=Weapon(), hp=1):
         super().__init__(filename=filename)

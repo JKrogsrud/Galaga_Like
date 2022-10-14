@@ -9,10 +9,13 @@ python -m arcade.examples.starting_template
 """
 import arcade
 from bullet import Bullet
+from player import Player
+from enemy import Enemy
 
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 700
 ENEMY_SPRITE_SCALING = .0375
+PLAYER_SPRITE_SCALING = .5
 SCREEN_TITLE = "Galaga"
 
 
@@ -40,7 +43,6 @@ class MyGame(arcade.Window):
         self.background_list = None
 
 
-
     def setup(self):
         """ Set up the game variables. Call to re-start the game. """
         # Create your sprites and sprite lists here
@@ -51,12 +53,19 @@ class MyGame(arcade.Window):
         self.player_bullet_list = arcade.SpriteList()
         self.background_list = arcade.SpriteList()
 
-        # Test Bullet
+        """ BULLET TESTING
         bullet = Bullet('blue_laser.png', damage=1)
         bullet.center_y = 0
         bullet.center_x = 200
         bullet.change_y = 5
         self.enemy_bullet_list.append(bullet)
+        """
+
+        # Set up the player
+        self.player_sprite = Player()
+        self.player_sprite.center_x = int(SCREEN_WIDTH / 2)
+        self.player_sprite.center_y = 40
+        self.player_list.append(self.player_sprite)
 
         pass
 
@@ -88,7 +97,7 @@ class MyGame(arcade.Window):
         # Check stuff
         for bullet in self.enemy_bullet_list:
 
-            # Bullet is off the top of screen
+            # Bullet is off the top of screen, remove it
             if bullet.bottom > SCREEN_HEIGHT:
                 bullet.remove_from_sprite_lists()
 
@@ -102,11 +111,17 @@ class MyGame(arcade.Window):
         https://api.arcade.academy/en/latest/arcade.key.html
         """
         if key == 32:
+            # Fire a weapon from current weapon of player at their location
+
+            player.fire()
+
+            """
             bullet = Bullet('blue_laser.png', damage=1)
             bullet.center_y = 0
             bullet.center_x = 200
             bullet.change_y = 5
             self.enemy_bullet_list.append(bullet)
+            """
         pass
 
     def on_key_release(self, key, key_modifiers):
