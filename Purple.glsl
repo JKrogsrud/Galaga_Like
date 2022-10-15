@@ -7,7 +7,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
     float distance = length(rpos);
 
-    float scale = 0.6;
+    float scale = 0.1;
     float strength = 1.0 / distance * scale;
 
     vec3 color = strength * vec3(0.5, 0.0, 0.7);
