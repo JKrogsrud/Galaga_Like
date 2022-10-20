@@ -26,6 +26,7 @@ SCREEN_TITLE = "Galaga"
 Shows the enemy tiles for sprint 1, will have enemies arrive based on time in final product
 """
 level = 5
+screen = "start"
 
 # **** the amount of each enemy type per level can be changed here
 # **** don't let number of enemy 2 or number of enemy 3 be greater than 7
@@ -82,6 +83,7 @@ class MyGame(arcade.Window):
         self.player_list = None
         self.player_bullet_list = None
         self.background_list = None
+        self.start_screen_list = None
 
         # Loads a file and creates a shader from it
         #window_size = self.get_size()
@@ -90,6 +92,13 @@ class MyGame(arcade.Window):
 
     def setup(self):
         """ Set up the game variables. Call to re-start the game. """
+
+        #SET UP START SCREEN
+        self.start_screen_list = []
+        
+
+
+
         # Setup Background
         self.background_list = []
 
@@ -115,6 +124,7 @@ class MyGame(arcade.Window):
         self.player_list = arcade.SpriteList()
         self.player_bullet_list = arcade.SpriteList()
 
+        #ENEMY SETUP
         if level == 1 or level == 2:
             num_of_enemies_1 = 6
         elif level == 3 or level == 4:
@@ -122,6 +132,8 @@ class MyGame(arcade.Window):
         else:
             num_of_enemies_1 = 12
 
+        #SET UP ENEMIES
+        #Set up list 1 enemies
         for i in range(NUM_OF_ENEMY_1):
             self.enemy_sprite = Enemy("Enemy_1.png", scale=ENEMY_SPRITE_SCALING)
             if NUM_OF_ENEMY_1 <= 6:
@@ -142,7 +154,7 @@ class MyGame(arcade.Window):
         # Set up the enemies for list 2
         for i in range(NUM_OF_ENEMY_2):
             self.enemy_sprite = Enemy("Enemy_2.png", ENEMY_SPRITE_SCALING)
-            self.enemy_sprite.center_x = 75 + + (SCREEN_WIDTH - 150) / NUM_OF_ENEMY_2 / 2 + (
+            self.enemy_sprite.center_x = 75 + (SCREEN_WIDTH - 150) / NUM_OF_ENEMY_2 / 2 + (
                         (SCREEN_WIDTH - 150) / NUM_OF_ENEMY_2) * i
             self.enemy_sprite.center_y = SCREEN_HEIGHT - 100
             self.enemy_list.append(self.enemy_sprite)
@@ -150,7 +162,7 @@ class MyGame(arcade.Window):
         # Set up the enemies for list 3
         for i in range(NUM_OF_ENEMY_3):
             self.enemy_sprite = Enemy("Enemy_3.png", ENEMY_SPRITE_SCALING)
-            self.enemy_sprite.center_x = 75 + + (SCREEN_WIDTH-150)/NUM_OF_ENEMY_3/2 + ((SCREEN_WIDTH-150)/NUM_OF_ENEMY_3)*i
+            self.enemy_sprite.center_x = 75 + (SCREEN_WIDTH-150)/NUM_OF_ENEMY_3/2 + ((SCREEN_WIDTH-150)/NUM_OF_ENEMY_3)*i
             self.enemy_sprite.center_y = SCREEN_HEIGHT - 50
             self.enemy_list.append(self.enemy_sprite)
 
