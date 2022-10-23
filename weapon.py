@@ -28,6 +28,7 @@ class Weapon():
         # Create Bullet object
         if self.ammo > 0 or not self.requires_ammo:  # Ammo available or not needed
             bullet = self.bullet_type
+            bullet.friendly = self.friendly
             bullet.center_x = x_loc
             bullet.center_y = y_loc
             bullet.speed = self.bullet_speed

@@ -8,11 +8,13 @@ If Python and Arcade are installed, this example can be run from the command lin
 python -m arcade.examples.starting_template
 """
 import arcade
+from weapon import Weapon
 from bullet import Bullet
 from player import Player
 from enemy import Enemy
 import random
 import math
+import copy
 from arcade.experimental import Shadertoy
 
 SCREEN_WIDTH = 500
@@ -22,35 +24,14 @@ PLAYER_SPRITE_SCALING = .5
 SCREEN_TITLE = "Galaga"
 
 
-"""
-Shows the enemy tiles for sprint 1, will have enemies arrive based on time in final product
-"""
-level = 5
-
-# **** the amount of each enemy type per level can be changed here
-# **** don't let number of enemy 2 or number of enemy 3 be greater than 7
-if level == 1:
-    NUM_OF_ENEMY_1 = 5
-    NUM_OF_ENEMY_2 = 3
-    NUM_OF_ENEMY_3 = 0
-elif level == 2:
-    NUM_OF_ENEMY_1 = 7
-    NUM_OF_ENEMY_2 = 5
-    NUM_OF_ENEMY_3 = 0
-elif level == 3:
-    NUM_OF_ENEMY_1 = 10
-    NUM_OF_ENEMY_2 = 5
-    NUM_OF_ENEMY_3 = 1
-elif level == 4:
-    NUM_OF_ENEMY_1 = 12
-    NUM_OF_ENEMY_2 = 6
-    NUM_OF_ENEMY_3 = 3
-else:
-    NUM_OF_ENEMY_1 = 14
-    NUM_OF_ENEMY_2 = 9
-    NUM_OF_ENEMY_3 = 5
-
-
+def create_level_one_bug():
+    goo_shot = Bullet(filename="goo_shot_1.png",
+                      speed=10)
+    enemy_weapon = Weapon(friendly=False, requires_ammo=False, bullet_type=goo_shot, bullet_speed=10)
+    enemy = Enemy(filename="Enemy_1.png",
+                  scale=ENEMY_SPRITE_SCALING,
+                  weapon=enemy_weapon)
+    return copy.deepcopy(enemy)
 
 class Star:
     def __init__(self):
@@ -115,44 +96,51 @@ class MyGame(arcade.Window):
         self.player_list = arcade.SpriteList()
         self.player_bullet_list = arcade.SpriteList()
 
-        if level == 1 or level == 2:
-            num_of_enemies_1 = 6
-        elif level == 3 or level == 4:
-            num_of_enemies_1 = 10
-        else:
-            num_of_enemies_1 = 12
+        # if level == 1 or level == 2:
+        #     num_of_enemies_1 = 6
+        # elif level == 3 or level == 4:
+        #     num_of_enemies_1 = 10
+        # else:
+        #     num_of_enemies_1 = 12
+        #
+        # for i in range(NUM_OF_ENEMY_1):
+        #     self.enemy_sprite = Enemy("Enemy_1.png", scale=ENEMY_SPRITE_SCALING)
+        #     if NUM_OF_ENEMY_1 <= 6:
+        #
+        #         self.enemy_sprite.center_x = 75 + (SCREEN_WIDTH-150)/7/2 + ((SCREEN_WIDTH-150)/NUM_OF_ENEMY_1)*i
+        #         self.enemy_sprite.center_y = SCREEN_HEIGHT - 200
+        #     else:
+        #         if i <= 6:
+        #             spacing = (SCREEN_WIDTH-150)
+        #             self.enemy_sprite.center_x = 75 + (SCREEN_WIDTH-150)/7/2 + ((SCREEN_WIDTH - 150)/7)*(i)
+        #             self.enemy_sprite.center_y = SCREEN_HEIGHT - 200
+        #         else:
+        #             self.enemy_sprite.center_x = 75+ (SCREEN_WIDTH-150)/(NUM_OF_ENEMY_1- 7)/2 + ((SCREEN_WIDTH - 150)/(NUM_OF_ENEMY_1- 7))*(i - 7)
+        #             self.enemy_sprite.center_y = SCREEN_HEIGHT - 150
+        #
+        #     self.enemy_list.append(self.enemy_sprite)
+        #
+        # # Set up the enemies for list 2
+        # for i in range(NUM_OF_ENEMY_2):
+        #     self.enemy_sprite = Enemy("Enemy_2.png", ENEMY_SPRITE_SCALING)
+        #     self.enemy_sprite.center_x = 75 + + (SCREEN_WIDTH - 150) / NUM_OF_ENEMY_2 / 2 + (
+        #                 (SCREEN_WIDTH - 150) / NUM_OF_ENEMY_2) * i
+        #     self.enemy_sprite.center_y = SCREEN_HEIGHT - 100
+        #     self.enemy_list.append(self.enemy_sprite)
+        #
+        # # Set up the enemies for list 3
+        # for i in range(NUM_OF_ENEMY_3):
+        #     self.enemy_sprite = Enemy("Enemy_3.png", ENEMY_SPRITE_SCALING)
+        #     self.enemy_sprite.center_x = 75 + + (SCREEN_WIDTH-150)/NUM_OF_ENEMY_3/2 + ((SCREEN_WIDTH-150)/NUM_OF_ENEMY_3)*i
+        #     self.enemy_sprite.center_y = SCREEN_HEIGHT - 50
+        #     self.enemy_list.append(self.enemy_sprite)
 
-        for i in range(NUM_OF_ENEMY_1):
-            self.enemy_sprite = Enemy("Enemy_1.png", scale=ENEMY_SPRITE_SCALING)
-            if NUM_OF_ENEMY_1 <= 6:
-
-                self.enemy_sprite.center_x = 75 + (SCREEN_WIDTH-150)/7/2 + ((SCREEN_WIDTH-150)/NUM_OF_ENEMY_1)*i
-                self.enemy_sprite.center_y = SCREEN_HEIGHT - 200
-            else:
-                if i <= 6:
-                    spacing = (SCREEN_WIDTH-150)
-                    self.enemy_sprite.center_x = 75 + (SCREEN_WIDTH-150)/7/2 + ((SCREEN_WIDTH - 150)/7)*(i)
-                    self.enemy_sprite.center_y = SCREEN_HEIGHT - 200
-                else:
-                    self.enemy_sprite.center_x = 75+ (SCREEN_WIDTH-150)/(NUM_OF_ENEMY_1- 7)/2 + ((SCREEN_WIDTH - 150)/(NUM_OF_ENEMY_1- 7))*(i - 7)
-                    self.enemy_sprite.center_y = SCREEN_HEIGHT - 150
-
-            self.enemy_list.append(self.enemy_sprite)
-
-        # Set up the enemies for list 2
-        for i in range(NUM_OF_ENEMY_2):
-            self.enemy_sprite = Enemy("Enemy_2.png", ENEMY_SPRITE_SCALING)
-            self.enemy_sprite.center_x = 75 + + (SCREEN_WIDTH - 150) / NUM_OF_ENEMY_2 / 2 + (
-                        (SCREEN_WIDTH - 150) / NUM_OF_ENEMY_2) * i
-            self.enemy_sprite.center_y = SCREEN_HEIGHT - 100
-            self.enemy_list.append(self.enemy_sprite)
-
-        # Set up the enemies for list 3
-        for i in range(NUM_OF_ENEMY_3):
-            self.enemy_sprite = Enemy("Enemy_3.png", ENEMY_SPRITE_SCALING)
-            self.enemy_sprite.center_x = 75 + + (SCREEN_WIDTH-150)/NUM_OF_ENEMY_3/2 + ((SCREEN_WIDTH-150)/NUM_OF_ENEMY_3)*i
-            self.enemy_sprite.center_y = SCREEN_HEIGHT - 50
-            self.enemy_list.append(self.enemy_sprite)
+        # Setup enemy sprites
+        enemy_1 = create_level_one_bug()
+        enemy_1.center_x = 40
+        enemy_1.center_y = 500
+        enemy_1.angle = math.radians(math.pi)
+        self.enemy_list.append(enemy_1)
 
         # Set up the player
         self.player_sprite = Player()
@@ -239,6 +227,12 @@ class MyGame(arcade.Window):
 
         # Move Enemy Ships
         self.enemy_list.update()
+
+        # Check if any enemies are ready to fire
+        for enemy in self.enemy_list:
+            if enemy.to_fire:
+                bullet = enemy.fire()
+                self.enemy_bullet_list.append(bullet)
         pass
 
     def on_key_press(self, key, key_modifiers):
