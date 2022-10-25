@@ -1,17 +1,9 @@
-"""
-Starting Template
-
-Once you have learned how to use classes, you can begin your program with this
-template.
-
-If Python and Arcade are installed, this example can be run from the command line with:
-python -m arcade.examples.starting_template
-"""
 import arcade
 from weapon import Weapon
 from bullet import Bullet
 from player import Player
 from enemy import Enemy
+from battle_line import Horizontal_Battle_Line
 import random
 import math
 import copy
@@ -91,7 +83,7 @@ class MyGame(arcade.Window):
         arcade.set_background_color(arcade.color.BLACK)
         # Create your sprites and sprite lists here
 
-        self.enemy_list = arcade.SpriteList()
+        self.enemy_list = Horizontal_Battle_Line(speed=1, num_ships=10, left_pos=100, right_pos=400, depth=600)
         self.enemy_bullet_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.player_bullet_list = arcade.SpriteList()
@@ -138,9 +130,15 @@ class MyGame(arcade.Window):
         # Setup enemy sprites
         enemy_1 = create_level_one_bug()
         enemy_1.center_x = 40
-        enemy_1.center_y = 500
-        enemy_1.angle = math.radians(math.pi)
-        self.enemy_list.append(enemy_1)
+        enemy_1.center_y = 750
+        enemy_1.angle = 180
+        self.enemy_list.add_enemy(0, enemy_1)
+
+        enemy_2 = create_level_one_bug()
+        enemy_2.center_x = 500
+        enemy_2.center_y = 750
+        enemy_2.angle = 180
+        self.enemy_list.add_enemy(1, enemy_2)
 
         # Set up the player
         self.player_sprite = Player()
