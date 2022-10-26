@@ -42,12 +42,10 @@ class StartButton(arcade.gui.UIFlatButton):
     """
     StartButton class for start screen
     """
-
     def on_click(self, event: arcade.gui.UIOnClickEvent):
-        game_view = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        game_view = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
         game_view.setup()
-        self.window.show_view(game_view)
-
+        game_view.window.show_view(game_view)
 
 class StartScreen(arcade.View):
 
@@ -74,10 +72,8 @@ class StartScreen(arcade.View):
 
         start_button_1 = StartButton(text="One Player", width=150, style=default_style)
         self.start_screen_alignment.add(start_button_1)
-        #start_button_1.on_click = self.on_click_start
         start_button_2 = StartButton(text="Two Players", width=150, style=default_style)
         self.start_screen_alignment.add(start_button_2)
-       # start_button_2.on_click = self.on_click_start
 
         self.manager.add(
             arcade.gui.UIAnchorWidget(
@@ -86,18 +82,13 @@ class StartScreen(arcade.View):
                 child=self.start_screen_alignment)
         )
 
+
     def on_draw(self):
         self.clear()
         self.manager.draw()
 
-    #def on_click_start(self, event):
-    #    game_view = MyGame()
-    #    game_view.setup()
-    #    self.window.show_view(game_view)
 
-
-
-class MyGame(arcade.Window):
+class MyGame(arcade.View):
     """
     Main application class.
 
@@ -106,7 +97,7 @@ class MyGame(arcade.Window):
     with your own code. Don't leave 'pass' in this program.
     """
     def __init__(self, width, height, title):
-        super().__init__(width, height, title)
+        super().__init__()
 
         # If you have sprite lists, you should create them here,
         # and set them to None
@@ -117,7 +108,6 @@ class MyGame(arcade.Window):
         self.background_list = None
 
         self.level= 1
-        self.screen = "start"
 
         # Loads a file and creates a shader from it
         #window_size = self.get_size()
@@ -332,9 +322,9 @@ class MyGame(arcade.Window):
 
 def main():
     """ Main function """
-    game = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
     start_view = StartScreen()
-    game.show_view(start_view)
+    window.show_view(start_view)
     arcade.run()
 
 
