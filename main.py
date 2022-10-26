@@ -49,6 +49,10 @@ class StartButton(arcade.gui.UIFlatButton):
 
 class StartScreen(arcade.View):
 
+    def setup(self):
+        self.logo = arcade.Sprite("Galaga.png", .15)
+        self.logo.center_x = SCREEN_WIDTH/2
+        self.logo.center_y = SCREEN_HEIGHT - 200
     def on_show_view(self):
         # SET UP START SCREEN
 
@@ -86,8 +90,7 @@ class StartScreen(arcade.View):
     def on_draw(self):
         self.clear()
         self.manager.draw()
-
-
+        self.logo.draw()
 class MyGame(arcade.View):
     """
     Main application class.
@@ -324,6 +327,7 @@ def main():
     """ Main function """
     window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
     start_view = StartScreen()
+    start_view.setup()
     window.show_view(start_view)
     arcade.run()
 
