@@ -15,6 +15,8 @@ class Horizontal_Battle_Line(arcade.SpriteList):
         self.depth = depth
         self.going_right = True
         self.change_x = speed
+        self.moving_forward = False
+
 
 
         # Fill the position tracker with False to imply no ships have been added

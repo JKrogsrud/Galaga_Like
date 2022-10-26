@@ -2,7 +2,7 @@ import arcade
 from weapon import Weapon
 from bullet import Bullet
 from player import Player
-from enemy import Enemy
+from enemy import Enemy, create_level_one_bug,create_level_two_bug,create_level_three_bug
 from battle_line import Horizontal_Battle_Line
 import random
 import math
@@ -15,15 +15,14 @@ ENEMY_SPRITE_SCALING = .0375
 PLAYER_SPRITE_SCALING = .5
 SCREEN_TITLE = "Galaga"
 
+# class Level_One:
+#     def __init__(self):
+#         battle_line_1 = Horizontal_Battle_Line()
+#         battle_line_2 = Horizontal_Battle_Line()
+#         battle_line_3 = Horizontal_Battle_Line()
+#         battle_line_4 = Horizontal_Battle_Line()
+#         battle_line_5 = Horizontal_Battle_Line()
 
-def create_level_one_bug():
-    goo_shot = Bullet(filename="goo_shot_1.png",
-                      speed=10)
-    enemy_weapon = Weapon(friendly=False, requires_ammo=False, bullet_type=goo_shot, bullet_speed=10)
-    enemy = Enemy(filename="Enemy_1.png",
-                  scale=ENEMY_SPRITE_SCALING,
-                  weapon=enemy_weapon)
-    return copy.deepcopy(enemy)
 
 class Star:
     def __init__(self):
@@ -34,6 +33,7 @@ class Star:
         # Reset flake to random position above screen
         self.y = random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT + 100)
         self.x = random.randrange(SCREEN_WIDTH)
+
 
 class MyGame(arcade.Window):
     """
@@ -213,13 +213,29 @@ class MyGame(arcade.Window):
         # Check stuff
         for bullet in self.enemy_bullet_list:
             # Bullet contact with player sprite
+            hits = arcade.check_for_collision_with_list(bullet, self.player_list)
+
+            if len(hits) > 0:
+                bullet.remove_from_sprite_lists()
+
+                # Player hurt and loses a life
+
 
             # Bullet is off the below screen
-            if bullet.bottom < 0:
+            if bullet.top < 0:
                 bullet.remove_from_sprite_lists()
+
 
         for bullet in self.player_bullet_list:
             # Bullet contact with enemy sprite
+            hits = arcade.check_for_collision_with_list(self.enemy_list)
+
+            if len(hits) > 0:
+                bullet.remove_from_sprite_lists()
+                for enemy_hit in hits:
+                    enemy_hit.hp
+
+            # Bullet is above the screen
             if bullet.bottom > SCREEN_HEIGHT:
                 bullet.remove_from_sprite_lists()
 

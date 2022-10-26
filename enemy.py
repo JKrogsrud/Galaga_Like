@@ -1,15 +1,19 @@
 import arcade
 from weapon import Weapon
+from bullet import Bullet
 import math
+import copy
 
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 700
+ENEMY_SPRITE_SCALING = .0375
+PLAYER_SPRITE_SCALING = .5
 
 
 class Enemy(arcade.Sprite):
     def __init__(self,
                  filename,
-                 destination=0,
+                 destination=(0, 0),
                  position_in_battle_line=0,
                  scale=0.375,
                  weapon=Weapon(),
@@ -72,3 +76,38 @@ class Enemy(arcade.Sprite):
         self.to_fire = False
         bullet = self.weapon.fire(self.center_x, self.top - self.height)
         return bullet
+
+
+def create_level_one_bug():
+    goo_shot = Bullet(filename="goo_shot_1.png",
+                      speed=10)
+    enemy_weapon = Weapon(friendly=False, requires_ammo=False, bullet_type=goo_shot, bullet_speed=10)
+    enemy = Enemy(filename="Enemy_1.png",
+                  scale=ENEMY_SPRITE_SCALING,
+                  weapon=enemy_weapon)
+    return copy.deepcopy(enemy)
+
+
+def create_level_two_bug():
+    goo_shot = Bullet(filename="goo_shot_1.png",
+                      speed=12)
+    enemy_weapon = Weapon(friendly=False, requires_ammo=False, bullet_type=goo_shot, bullet_speed=12)
+    enemy = Enemy(filename="Enemy_2.png",
+                  scale=ENEMY_SPRITE_SCALING,
+                  weapon=enemy_weapon,
+                  hp=2,
+                  speed_to_formation=9,
+                  time_between_firing=1.5)
+    return copy.deepcopy(enemy)
+
+def create_level_three_bug():
+    goo_shot = Bullet(filename="goo_shot_1.png",
+                      speed=14)
+    enemy_weapon = Weapon(friendly=False, requires_ammo=False, bullet_type=goo_shot, bullet_speed=14)
+    enemy = Enemy(filename="Enemy_3.png",
+                  scale=ENEMY_SPRITE_SCALING,
+                  weapon=enemy_weapon,
+                  hp=3,
+                  speed_to_formation=8,
+                  time_between_firing=1.3)
+    return copy.deepcopy(enemy)
