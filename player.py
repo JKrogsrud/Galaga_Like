@@ -6,11 +6,11 @@ SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 700
 
 class Player(arcade.Sprite):
-    def __init__(self, filename=":resources:images/space_shooter/playerShip1_blue.png",
+    def __init__(self, filename="Player.png",
                  lives=3,
                  weapon=Weapon(),
                  movement_speed=10):
-        super().__init__(filename, scale=0.5)
+        super().__init__(filename, scale=0.035)
         self.lives = lives
         self.weapon = weapon
         self.movement_speed = movement_speed

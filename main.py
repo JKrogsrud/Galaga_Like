@@ -1,3 +1,12 @@
+"""
+Starting Template
+
+Once you have learned how to use classes, you can begin your program with this
+template.
+
+If Python and Arcade are installed, this example can be run from the command line with:
+python -m arcade.examples.starting_template
+"""
 import arcade
 from weapon import Weapon
 from bullet import Bullet
@@ -6,7 +15,7 @@ from enemy import Enemy, create_level_one_bug,create_level_two_bug,create_level_
 from battle_line import Horizontal_Battle_Line
 import random
 import math
-import copy
+import arcade.gui
 from arcade.experimental import Shadertoy
 
 SCREEN_WIDTH = 500
@@ -34,8 +43,61 @@ class Star:
         self.y = random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT + 100)
         self.x = random.randrange(SCREEN_WIDTH)
 
+class StartButton(arcade.gui.UIFlatButton):
+    """
+    StartButton class for start screen
+    """
+    def on_click(self, event: arcade.gui.UIOnClickEvent):
+        game_view = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
+        game_view.setup()
+        game_view.window.show_view(game_view)
 
-class MyGame(arcade.Window):
+class StartScreen(arcade.View):
+
+    def setup(self):
+        self.logo = arcade.Sprite("Galaga.png", .15)
+        self.logo.center_x = SCREEN_WIDTH/2
+        self.logo.center_y = SCREEN_HEIGHT - 200
+    def on_show_view(self):
+        # SET UP START SCREEN
+
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+        self.start_screen_alignment = arcade.gui.UIBoxLayout(space_between=20)
+
+        default_style = {
+            "font_name": ("calibri", "arial"),
+            "font_size": 15,
+            "font_color": arcade.color.WHITE,
+            "font_color_pressed": arcade.color.WHITE,
+            "border_width": 5,
+            "border_color": None,
+            "bg_color": (43, 80, 227),
+            "bg_color_pressed": (173, 27, 10),
+            "bg_color_hover": (43, 80, 227),
+            "border_color_hover": (173, 27, 10),
+            "border_color_pressed": (173, 27, 10)
+        }
+
+        start_button_1 = StartButton(text="One Player", width=150, style=default_style)
+        self.start_screen_alignment.add(start_button_1)
+        start_button_2 = StartButton(text="Two Players", width=150, style=default_style)
+        self.start_screen_alignment.add(start_button_2)
+
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="center_x",
+                anchor_y="center_y",
+                child=self.start_screen_alignment)
+        )
+
+
+    def on_draw(self):
+        self.clear()
+        self.manager.draw()
+        self.logo.draw()
+
+class MyGame(arcade.View):
     """
     Main application class.
 
@@ -45,7 +107,7 @@ class MyGame(arcade.Window):
     """
 
     def __init__(self, width, height, title):
-        super().__init__(width, height, title)
+        super().__init__()
 
         # If you have sprite lists, you should create them here,
         # and set them to None
@@ -81,6 +143,7 @@ class MyGame(arcade.Window):
             self.background_list.append(star)
 
         arcade.set_background_color(arcade.color.BLACK)
+
         # Create your sprites and sprite lists here
 
         self.enemy_list = Horizontal_Battle_Line(speed=1, num_ships=10, left_pos=100, right_pos=400, depth=600)
@@ -177,6 +240,8 @@ class MyGame(arcade.Window):
 
         self.clear()
 
+        #GAME PLAY DISPLAY
+
         for star in self.background_list:
             arcade.draw_circle_filled(star.x, star.y, star.size, arcade.color.YELLOW_ORANGE)
 
@@ -203,7 +268,7 @@ class MyGame(arcade.Window):
             # Check if star has fallen below screen
             if star.y < 0:
                 star.reset_pos()
- 
+
 
         # Call update on bullet sprites
         self.enemy_bullet_list.update()
@@ -222,7 +287,7 @@ class MyGame(arcade.Window):
 
 
             # Bullet is off the below screen
-            if bullet.top < 0:
+            if bullet.bottom < 0:
                 bullet.remove_from_sprite_lists()
 
 
@@ -287,10 +352,13 @@ class MyGame(arcade.Window):
 
 def main():
     """ Main function """
-    game = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-    game.setup()
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
+    start_view = StartScreen()
+    start_view.setup()
+    window.show_view(start_view)
     arcade.run()
 
 
 if __name__ == "__main__":
     main()
+
