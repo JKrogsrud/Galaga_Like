@@ -203,7 +203,7 @@ class MyGame(arcade.Window):
             # Check if star has fallen below screen
             if star.y < 0:
                 star.reset_pos()
-
+ 
 
         # Call update on bullet sprites
         self.enemy_bullet_list.update()
@@ -228,12 +228,15 @@ class MyGame(arcade.Window):
 
         for bullet in self.player_bullet_list:
             # Bullet contact with enemy sprite
-            hits = arcade.check_for_collision_with_list(self.enemy_list)
+            hits = arcade.check_for_collision_with_list(bullet, self.enemy_list)
 
             if len(hits) > 0:
                 bullet.remove_from_sprite_lists()
                 for enemy_hit in hits:
-                    enemy_hit.hp
+                    enemy_hit.hp -= bullet.damage
+                    if enemy_hit.hp <= 0:
+                        enemy_hit.remove_from_sprite_lists()
+
 
             # Bullet is above the screen
             if bullet.bottom > SCREEN_HEIGHT:
