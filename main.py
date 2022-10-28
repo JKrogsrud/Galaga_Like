@@ -11,7 +11,7 @@ import arcade
 from weapon import Weapon
 from bullet import Bullet
 from player import Player
-from enemy import Enemy, create_level_one_bug,create_level_two_bug,create_level_three_bug
+from enemy import Enemy, create_level_one_bug, create_level_two_bug, create_level_three_bug
 from battle_line import Horizontal_Battle_Line
 import random
 import math
@@ -275,7 +275,7 @@ class MyGame(arcade.View):
         self.player_bullet_list.update()
         self.player_list.update()
 
-        # Check stuff
+        # Check Collisions
         for bullet in self.enemy_bullet_list:
             # Bullet contact with player sprite
             hits = arcade.check_for_collision_with_list(bullet, self.player_list)
@@ -284,6 +284,7 @@ class MyGame(arcade.View):
                 bullet.remove_from_sprite_lists()
 
                 # Player hurt and loses a life
+
 
 
             # Bullet is off the below screen
@@ -301,7 +302,7 @@ class MyGame(arcade.View):
                     enemy_hit.hp -= bullet.damage
                     if enemy_hit.hp <= 0:
                         enemy_hit.remove_from_sprite_lists()
-
+                        # Explosion here
 
             # Bullet is above the screen
             if bullet.bottom > SCREEN_HEIGHT:
