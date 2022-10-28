@@ -51,7 +51,6 @@ else:
     NUM_OF_ENEMY_3 = 5
 
 
-
 class Star:
     def __init__(self):
         self.x = 0
