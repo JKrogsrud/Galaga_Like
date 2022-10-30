@@ -15,8 +15,14 @@ import random
 import math
 from arcade.experimental import Shadertoy
 
+FULL_SCREEN_HEIGHT = 700
 SCREEN_WIDTH = 500
-SCREEN_HEIGHT = 700
+SCREEN_HEIGHT = 680
+HUD_WIDTH = 500
+HUD_HEIGHT = 30
+HUD_X_CENTER = 250
+HUD_Y_CENTER = 685
+HUD_LIVES_START = 350
 ENEMY_SPRITE_SCALING = .0375
 PLAYER_SPRITE_SCALING = .5
 SCREEN_TITLE = "Galaga"
@@ -61,6 +67,7 @@ class Star:
         self.y = random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT + 100)
         self.x = random.randrange(SCREEN_WIDTH)
 
+
 class MyGame(arcade.Window):
     """
     Main application class.
@@ -82,10 +89,14 @@ class MyGame(arcade.Window):
         self.player_bullet_list = None
         self.background_list = None
 
-        # Loads a file and creates a shader from it
-        #window_size = self.get_size()
-        #self.shadertoy = Shadertoy.create_from_file(window_size, "Purple.glsl")
+        self.life_1 = None
+        self.life_2 = None
+        self.life_3 = None
+        self.life_4 = None
 
+        # Loads a file and creates a shader from it
+        # window_size = self.get_size()
+        # self.shadertoy = Shadertoy.create_from_file(window_size, "Purple.glsl")
 
     def setup(self):
         """ Set up the game variables. Call to re-start the game. """
@@ -114,6 +125,11 @@ class MyGame(arcade.Window):
         self.player_list = arcade.SpriteList()
         self.player_bullet_list = arcade.SpriteList()
 
+        self.life_1 = arcade.SpriteList()
+        self.life_2 = arcade.SpriteList()
+        self.life_3 = arcade.SpriteList()
+        self.life_4 = arcade.SpriteList()
+
         if level == 1 or level == 2:
             num_of_enemies_1 = 6
         elif level == 3 or level == 4:
@@ -137,6 +153,20 @@ class MyGame(arcade.Window):
                     self.enemy_sprite.center_y = SCREEN_HEIGHT - 150
 
             self.enemy_list.append(self.enemy_sprite)
+
+        # set up spacing for lives
+        self.life_1 = arcade.Sprite("heart.png", scale=.07)
+        self.life_1.center_y = HUD_Y_CENTER
+        self.life_1.center_x = HUD_LIVES_START
+        self.life_2 = arcade.Sprite("heart.png", scale=.07)
+        self.life_2.center_y = HUD_Y_CENTER
+        self.life_2.center_x = HUD_LIVES_START + 25
+        self.life_3 = arcade.Sprite("heart.png", scale=.07)
+        self.life_3.center_y = HUD_Y_CENTER
+        self.life_3.center_x = HUD_LIVES_START + 50
+        self.life_4 = arcade.Sprite("heart.png", scale=.07)
+        self.life_4.center_y = HUD_Y_CENTER
+        self.life_4.center_x = HUD_LIVES_START + 75
 
         # Set up the enemies for list 2
         for i in range(NUM_OF_ENEMY_2):
@@ -178,8 +208,6 @@ class MyGame(arcade.Window):
 
         arcade.set_background_color(arcade.color.BLACK)
 
-        pass
-
     def on_draw(self):
         """
         Render the screen.
@@ -199,9 +227,23 @@ class MyGame(arcade.Window):
         self.player_list.draw()
         self.player_bullet_list.draw()
 
+        # draw the HUD: level, points, lives
+        # arcade.draw_rectangle_filled(HUD_X_CENTER, HUD_Y_CENTER, HUD_WIDTH, HUD_HEIGHT, arcade.color.GREEN)
+        arcade.draw_text(f'LEVEL: {level}\t  SCORE: 0\t  LIVES:', 10, SCREEN_HEIGHT, arcade.color.GREEN, 12,
+                         width=(SCREEN_WIDTH-20), align="left", font_name="Kenney Rocket Square")
+        lives = 4
+        if lives > 0:
+            self.life_1.draw()
+            if lives > 1:
+                self.life_2.draw()
+                if lives > 2:
+                    self.life_3.draw()
+                    if lives > 3:
+                        self.life_4.draw()
+
         # Run the GLSL code
-        #self.shadertoy.render()
-        #self.shadertoy.render()
+        # self.shadertoy.render()
+        # self.shadertoy.render()
 
     def on_update(self, delta_time):
         """
@@ -275,7 +317,7 @@ class MyGame(arcade.Window):
 
 def main():
     """ Main function """
-    game = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    game = MyGame(SCREEN_WIDTH, FULL_SCREEN_HEIGHT, SCREEN_TITLE)
     game.setup()
     arcade.run()
 
