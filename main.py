@@ -30,6 +30,8 @@ ENEMY_SPRITE_SCALING = .0375
 PLAYER_SPRITE_SCALING = .5
 SCREEN_TITLE = "Galaga"
 
+INDICATOR_BAR_OFFSET = 32
+
 # class Level_One:
 #     def __init__(self):
 #         battle_line_1 = Horizontal_Battle_Line()
@@ -37,6 +39,7 @@ SCREEN_TITLE = "Galaga"
 #         battle_line_3 = Horizontal_Battle_Line()
 #         battle_line_4 = Horizontal_Battle_Line()
 #         battle_line_5 = Horizontal_Battle_Line()
+
 
 class Star:
     def __init__(self):
@@ -48,6 +51,7 @@ class Star:
         self.y = random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT + 100)
         self.x = random.randrange(SCREEN_WIDTH)
 
+
 class StartButton(arcade.gui.UIFlatButton):
     """
     StartButton class for start screen
@@ -57,12 +61,14 @@ class StartButton(arcade.gui.UIFlatButton):
         game_view.setup()
         game_view.window.show_view(game_view)
 
+
 class StartScreen(arcade.View):
 
     def setup(self):
         self.logo = arcade.Sprite("Galaga.png", .15)
         self.logo.center_x = SCREEN_WIDTH/2
         self.logo.center_y = SCREEN_HEIGHT - 200
+
     def on_show_view(self):
         # SET UP START SCREEN
 
@@ -96,11 +102,11 @@ class StartScreen(arcade.View):
                 child=self.start_screen_alignment)
         )
 
-
     def on_draw(self):
         self.clear()
         self.manager.draw()
         self.logo.draw()
+
 
 class MyGame(arcade.View):
     """
@@ -123,10 +129,10 @@ class MyGame(arcade.View):
         self.player_bullet_list = None
         self.background_list = None
 
-        self.life_1 = None
-        self.life_2 = None
-        self.life_3 = None
-        self.life_4 = None
+        # sprites for player health
+        self.bar_list = None
+        self.player_sprite = None
+        self.top_label = None
 
         # Loads a file and creates a shader from it
         # window_size = self.get_size()
@@ -199,25 +205,6 @@ class MyGame(arcade.View):
         #     self.enemy_sprite.center_y = SCREEN_HEIGHT - 50
         #     self.enemy_list.append(self.enemy_sprite)
 
-        # setup lives
-        self.life_1 = arcade.SpriteList()
-        self.life_2 = arcade.SpriteList()
-        self.life_3 = arcade.SpriteList()
-        self.life_4 = arcade.SpriteList()
-        # set up spacing for lives
-        self.life_1 = arcade.Sprite("heart.png", scale=.07)
-        self.life_1.center_y = HUD_Y_CENTER
-        self.life_1.center_x = HUD_LIVES_START
-        self.life_2 = arcade.Sprite("heart.png", scale=.07)
-        self.life_2.center_y = HUD_Y_CENTER
-        self.life_2.center_x = HUD_LIVES_START + 25
-        self.life_3 = arcade.Sprite("heart.png", scale=.07)
-        self.life_3.center_y = HUD_Y_CENTER
-        self.life_3.center_x = HUD_LIVES_START + 50
-        self.life_4 = arcade.Sprite("heart.png", scale=.07)
-        self.life_4.center_y = HUD_Y_CENTER
-        self.life_4.center_x = HUD_LIVES_START + 75
-
         # Setup enemy sprites
         enemy_1 = create_level_one_bug()
         enemy_1.center_x = 40
@@ -231,8 +218,16 @@ class MyGame(arcade.View):
         enemy_2.angle = 180
         self.enemy_list.add_enemy(1, enemy_2)
 
+        # set up player health
+        self.bar_list = arcade.SpriteList()
+        self.top_label: arcade.Text = arcade.Text(
+            f'LEVEL: {0}\t  HEALTH: \t                   SCORE: 0', 10, SCREEN_HEIGHT-20, arcade.color.GREEN, 11,
+            width=(SCREEN_WIDTH - 20), align="left", font_name="Kenney Rocket Square"
+        )
+
         # Set up the player
-        self.player_sprite = Player()
+        # added bar list as a parameter
+        self.player_sprite = Player(self.bar_list)
         self.player_sprite.center_x = int(SCREEN_WIDTH / 2)
         self.player_sprite.center_y = 40
         self.player_list.append(self.player_sprite)
@@ -266,7 +261,7 @@ class MyGame(arcade.View):
 
         self.clear()
 
-        #GAME PLAY DISPLAY
+        # GAME PLAY DISPLAY
 
         for star in self.background_list:
             arcade.draw_circle_filled(star.x, star.y, star.size, arcade.color.YELLOW_ORANGE)
@@ -277,19 +272,9 @@ class MyGame(arcade.View):
         self.player_list.draw()
         self.player_bullet_list.draw()
 
-        # draw the HUD: level, points, lives
-        # arcade.draw_rectangle_filled(HUD_X_CENTER, HUD_Y_CENTER, HUD_WIDTH, HUD_HEIGHT, arcade.color.GREEN)
-        arcade.draw_text(f'LEVEL: {level}\t  SCORE: 0\t  LIVES:', 10, SCREEN_HEIGHT, arcade.color.GREEN, 12,
-                         width=(SCREEN_WIDTH-20), align="left", font_name="Kenney Rocket Square")
-        lives = 4
-        if lives > 0:
-            self.life_1.draw()
-            if lives > 1:
-                self.life_2.draw()
-                if lives > 2:
-                    self.life_3.draw()
-                    if lives > 3:
-                        self.life_4.draw()
+        # draw the player health bar and top label text
+        self.bar_list.draw()
+        self.top_label.draw()
 
         # Run the GLSL code
         # self.shadertoy.render()
@@ -301,6 +286,10 @@ class MyGame(arcade.View):
         Normally, you'll call update() on the sprite lists that
         need it.
         """
+        # check to see if the sprite is dead -> then exit the game
+        if self.player_sprite.health <= 0:
+            arcade.exit()
+
         # Animate all the stars falling
         for star in self.background_list:
             star.y -= star.speed * delta_time
@@ -308,7 +297,6 @@ class MyGame(arcade.View):
             # Check if star has fallen below screen
             if star.y < 0:
                 star.reset_pos()
-
 
         # Call update on bullet sprites
         self.enemy_bullet_list.update()
@@ -323,14 +311,16 @@ class MyGame(arcade.View):
             if len(hits) > 0:
                 bullet.remove_from_sprite_lists()
 
-                # Player hurt and loses a life
-
-
+                # Player hurt and has damage done
+                self.player_sprite.health -= bullet.damage
+                # reset indicator bar fullness
+                self.player_sprite.indicator_bar.fullness = (
+                    self.player_sprite.health / 5
+                )
 
             # Bullet is off the below screen
             if bullet.bottom < 0:
                 bullet.remove_from_sprite_lists()
-
 
         for bullet in self.player_bullet_list:
             # Bullet contact with enemy sprite
@@ -393,7 +383,7 @@ class MyGame(arcade.View):
 
 def main():
     """ Main function """
-    window = arcade.Window(SCREEN_WIDTH, FULL_SCREEN_HEIGHT, "Galaga")
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
     start_view = StartScreen()
     start_view.setup()
     window.show_view(start_view)
