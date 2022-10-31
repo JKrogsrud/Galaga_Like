@@ -52,6 +52,14 @@ class StartButton(arcade.gui.UIFlatButton):
         game_view.setup()
         game_view.window.show_view(game_view)
 
+"""
+class EndButton(arcade.gui.UIFlatButton):
+
+    def on_click(self, event: arcade.gui.UIOnClickEvent):
+        game_view = EndScreen(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
+        game_view.setup()
+        game_view.window.show_view(game_view)
+"""
 class StartScreen(arcade.View):
 
     def setup(self):
@@ -81,8 +89,10 @@ class StartScreen(arcade.View):
 
         start_button_1 = StartButton(text="One Player", width=150, style=default_style)
         self.start_screen_alignment.add(start_button_1)
-        start_button_2 = StartButton(text="Two Players", width=150, style=default_style)
-        self.start_screen_alignment.add(start_button_2)
+        #start_button_2 = StartButton(text="Two Players", width=150, style=default_style)
+        #self.start_screen_alignment.add(start_button_2)
+        end_button = EndButton(text="end screen", width=150, style=default_style)
+        self.start_screen_alignment.add(end_button)
 
         self.manager.add(
             arcade.gui.UIAnchorWidget(
@@ -117,6 +127,7 @@ class MyGame(arcade.View):
         self.player_list = None
         self.player_bullet_list = None
         self.background_list = None
+
 
         # Loads a file and creates a shader from it
         #window_size = self.get_size()
@@ -275,7 +286,7 @@ class MyGame(arcade.View):
         self.player_bullet_list.update()
         self.player_list.update()
 
-        # Check Collisions
+        # Check stuff
         for bullet in self.enemy_bullet_list:
             # Bullet contact with player sprite
             hits = arcade.check_for_collision_with_list(bullet, self.player_list)
@@ -350,6 +361,66 @@ class MyGame(arcade.View):
             self.player_sprite.update_player_speed()
         pass
 
+class ReturnStartButton(arcade.gui.UIFlatButton):
+    """ Return to start screen"""
+
+    def on_click(self, event: arcade.gui.UIOnClickEvent):
+        start_view = StartScreen()
+        start_view.setup()
+        start_view.window.show_view(start_view)
+
+class EndScreen(arcade.View):
+
+    def setup(self):
+        self.logo = arcade.Sprite("Galaga.png", .15)
+        self.logo.center_x = SCREEN_WIDTH/2
+        self.logo.center_y = SCREEN_HEIGHT - 200
+
+    def on_show_view(self):
+        # sets up the end screen
+
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+        self.end_screen_alignment = arcade.gui.UIBoxLayout(space_between=20)
+
+        default_style = {
+            "font_name": ("calibri", "arial"),
+            "font_size": 15,
+            "font_color": arcade.color.WHITE,
+            "font_color_pressed": arcade.color.WHITE,
+            "border_width": 5,
+            "border_color": None,
+            "bg_color": (43, 80, 227),
+            "bg_color_pressed": (173, 27, 10),
+            "bg_color_hover": (43, 80, 227),
+            "border_color_hover": (173, 27, 10),
+            "border_color_pressed": (173, 27, 10)
+        }
+
+        return_button = ReturnStartButton(text="Return to Start", width=150, style=default_style)
+        self.end_screen_alignment.add(return_button)
+        replay_button = StartButton(text="Play Again", width=150, style=default_style)
+        self.end_screen_alignment.add(replay_button)
+
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="center_x",
+                anchor_y="center_y",
+                child=self.end_screen_alignment)
+        )
+
+    def on_draw(self):
+        self.clear()
+        self.manager.draw()
+        # draws GAME OVER text
+        start_x = 0
+        start_y = (SCREEN_HEIGHT / 2) + 50
+        arcade.draw_text("GAME OVER", start_x, start_y, arcade.color.LIGHT_BLUE, 20, width=SCREEN_WIDTH, align="center")
+
+        start_x -= 50
+        start_y = (SCREEN_HEIGHT / 2) + 30
+        arcade.draw_text("SCORE:", start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
+        self.logo.draw()
 
 def main():
     """ Main function """
