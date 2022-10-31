@@ -15,6 +15,7 @@ from battle_line import Horizontal_Battle_Line
 import random
 import math
 from arcade.experimental import Shadertoy
+import arcade.gui
 
 FULL_SCREEN_HEIGHT = 700
 SCREEN_WIDTH = 500
@@ -122,7 +123,7 @@ class MyGame(arcade.View):
     """
 
     def __init__(self, width, height, title):
-        super().__init__(width, height, title)
+        super().__init__()
 
         # If you have sprite lists, you should create them here,
         # and set them to None
@@ -166,7 +167,7 @@ class MyGame(arcade.View):
 
         # Create your sprites and sprite lists here
 
-        self.enemy_list = arcade.SpriteList()
+        self.enemy_list = Horizontal_Battle_Line(speed=1, num_ships=10, left_pos=100, right_pos=400, depth=600)
         self.enemy_bullet_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.player_bullet_list = arcade.SpriteList()
@@ -284,6 +285,8 @@ class MyGame(arcade.View):
         self.enemy_bullet_list.draw()
         self.player_list.draw()
         self.player_bullet_list.draw()
+
+        level = 1
 
         # draw the HUD: level, points, lives
         # arcade.draw_rectangle_filled(HUD_X_CENTER, HUD_Y_CENTER, HUD_WIDTH, HUD_HEIGHT, arcade.color.GREEN)
