@@ -14,7 +14,6 @@ from enemy import Enemy
 import random
 import math
 import arcade.gui
-from arcade.experimental import Shadertoy
 
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 700
