@@ -52,20 +52,21 @@ class StartButton(arcade.gui.UIFlatButton):
         game_view.setup()
         game_view.window.show_view(game_view)
 
-"""
+
 class EndButton(arcade.gui.UIFlatButton):
 
     def on_click(self, event: arcade.gui.UIOnClickEvent):
-        game_view = EndScreen(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
+        game_view = EndScreen()
         game_view.setup()
         game_view.window.show_view(game_view)
-"""
+
 class StartScreen(arcade.View):
 
     def setup(self):
         self.logo = arcade.Sprite("Galaga.png", .15)
         self.logo.center_x = SCREEN_WIDTH/2
         self.logo.center_y = SCREEN_HEIGHT - 200
+
     def on_show_view(self):
         # SET UP START SCREEN
 
@@ -412,6 +413,7 @@ class EndScreen(arcade.View):
     def on_draw(self):
         self.clear()
         self.manager.draw()
+
         # draws GAME OVER text
         start_x = 0
         start_y = (SCREEN_HEIGHT / 2) + 50
