@@ -1,13 +1,12 @@
 ### File Overview:
 
-player_ship.py </br>
-ammo.py </br>
-game.py
+weapon.py </br>
+bullet.py </br>
+enemy.py </br>
+player.py </br>
+main.py
+
+## png files:
+blue_laser.png Enemy_1.png Enemy_2.png Enemy_3.png
 
 ### Rules:
-
-number of players:
-number of enemies:
-types of enemies:
-
-points:

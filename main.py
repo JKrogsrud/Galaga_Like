@@ -8,11 +8,14 @@ If Python and Arcade are installed, this example can be run from the command lin
 python -m arcade.examples.starting_template
 """
 import arcade
+from weapon import Weapon
 from bullet import Bullet
 from player import Player
-from enemy import Enemy
+from enemy import Enemy, create_level_one_bug, create_level_two_bug, create_level_three_bug
+from battle_line import Horizontal_Battle_Line
 import random
 import math
+import arcade.gui
 from arcade.experimental import Shadertoy
 
 SCREEN_WIDTH = 500
@@ -21,35 +24,13 @@ ENEMY_SPRITE_SCALING = .0375
 PLAYER_SPRITE_SCALING = .5
 SCREEN_TITLE = "Galaga"
 
-
-"""
-Shows the enemy tiles for sprint 1, will have enemies arrive based on time in final product
-"""
-level = 5
-
-# **** the amount of each enemy type per level can be changed here
-# **** don't let number of enemy 2 or number of enemy 3 be greater than 7
-if level == 1:
-    NUM_OF_ENEMY_1 = 5
-    NUM_OF_ENEMY_2 = 3
-    NUM_OF_ENEMY_3 = 0
-elif level == 2:
-    NUM_OF_ENEMY_1 = 7
-    NUM_OF_ENEMY_2 = 5
-    NUM_OF_ENEMY_3 = 0
-elif level == 3:
-    NUM_OF_ENEMY_1 = 10
-    NUM_OF_ENEMY_2 = 5
-    NUM_OF_ENEMY_3 = 1
-elif level == 4:
-    NUM_OF_ENEMY_1 = 12
-    NUM_OF_ENEMY_2 = 6
-    NUM_OF_ENEMY_3 = 3
-else:
-    NUM_OF_ENEMY_1 = 14
-    NUM_OF_ENEMY_2 = 9
-    NUM_OF_ENEMY_3 = 5
-
+# class Level_One:
+#     def __init__(self):
+#         battle_line_1 = Horizontal_Battle_Line()
+#         battle_line_2 = Horizontal_Battle_Line()
+#         battle_line_3 = Horizontal_Battle_Line()
+#         battle_line_4 = Horizontal_Battle_Line()
+#         battle_line_5 = Horizontal_Battle_Line()
 
 
 class Star:
@@ -62,7 +43,61 @@ class Star:
         self.y = random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT + 100)
         self.x = random.randrange(SCREEN_WIDTH)
 
-class MyGame(arcade.Window):
+class StartButton(arcade.gui.UIFlatButton):
+    """
+    StartButton class for start screen
+    """
+    def on_click(self, event: arcade.gui.UIOnClickEvent):
+        game_view = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
+        game_view.setup()
+        game_view.window.show_view(game_view)
+
+class StartScreen(arcade.View):
+
+    def setup(self):
+        self.logo = arcade.Sprite("Galaga.png", .15)
+        self.logo.center_x = SCREEN_WIDTH/2
+        self.logo.center_y = SCREEN_HEIGHT - 200
+    def on_show_view(self):
+        # SET UP START SCREEN
+
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+        self.start_screen_alignment = arcade.gui.UIBoxLayout(space_between=20)
+
+        default_style = {
+            "font_name": ("calibri", "arial"),
+            "font_size": 15,
+            "font_color": arcade.color.WHITE,
+            "font_color_pressed": arcade.color.WHITE,
+            "border_width": 5,
+            "border_color": None,
+            "bg_color": (43, 80, 227),
+            "bg_color_pressed": (173, 27, 10),
+            "bg_color_hover": (43, 80, 227),
+            "border_color_hover": (173, 27, 10),
+            "border_color_pressed": (173, 27, 10)
+        }
+
+        start_button_1 = StartButton(text="One Player", width=150, style=default_style)
+        self.start_screen_alignment.add(start_button_1)
+        start_button_2 = StartButton(text="Two Players", width=150, style=default_style)
+        self.start_screen_alignment.add(start_button_2)
+
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="center_x",
+                anchor_y="center_y",
+                child=self.start_screen_alignment)
+        )
+
+
+    def on_draw(self):
+        self.clear()
+        self.manager.draw()
+        self.logo.draw()
+
+class MyGame(arcade.View):
     """
     Main application class.
 
@@ -72,7 +107,7 @@ class MyGame(arcade.Window):
     """
 
     def __init__(self, width, height, title):
-        super().__init__(width, height, title)
+        super().__init__()
 
         # If you have sprite lists, you should create them here,
         # and set them to None
@@ -108,51 +143,65 @@ class MyGame(arcade.Window):
             self.background_list.append(star)
 
         arcade.set_background_color(arcade.color.BLACK)
+
         # Create your sprites and sprite lists here
 
-        self.enemy_list = arcade.SpriteList()
+        self.enemy_list = Horizontal_Battle_Line(speed=1, num_ships=10, left_pos=100, right_pos=400, depth=600)
         self.enemy_bullet_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.player_bullet_list = arcade.SpriteList()
 
-        if level == 1 or level == 2:
-            num_of_enemies_1 = 6
-        elif level == 3 or level == 4:
-            num_of_enemies_1 = 10
-        else:
-            num_of_enemies_1 = 12
+        # if level == 1 or level == 2:
+        #     num_of_enemies_1 = 6
+        # elif level == 3 or level == 4:
+        #     num_of_enemies_1 = 10
+        # else:
+        #     num_of_enemies_1 = 12
+        #
+        # for i in range(NUM_OF_ENEMY_1):
+        #     self.enemy_sprite = Enemy("Enemy_1.png", scale=ENEMY_SPRITE_SCALING)
+        #     if NUM_OF_ENEMY_1 <= 6:
+        #
+        #         self.enemy_sprite.center_x = 75 + (SCREEN_WIDTH-150)/7/2 + ((SCREEN_WIDTH-150)/NUM_OF_ENEMY_1)*i
+        #         self.enemy_sprite.center_y = SCREEN_HEIGHT - 200
+        #     else:
+        #         if i <= 6:
+        #             spacing = (SCREEN_WIDTH-150)
+        #             self.enemy_sprite.center_x = 75 + (SCREEN_WIDTH-150)/7/2 + ((SCREEN_WIDTH - 150)/7)*(i)
+        #             self.enemy_sprite.center_y = SCREEN_HEIGHT - 200
+        #         else:
+        #             self.enemy_sprite.center_x = 75+ (SCREEN_WIDTH-150)/(NUM_OF_ENEMY_1- 7)/2 + ((SCREEN_WIDTH - 150)/(NUM_OF_ENEMY_1- 7))*(i - 7)
+        #             self.enemy_sprite.center_y = SCREEN_HEIGHT - 150
+        #
+        #     self.enemy_list.append(self.enemy_sprite)
+        #
+        # # Set up the enemies for list 2
+        # for i in range(NUM_OF_ENEMY_2):
+        #     self.enemy_sprite = Enemy("Enemy_2.png", ENEMY_SPRITE_SCALING)
+        #     self.enemy_sprite.center_x = 75 + + (SCREEN_WIDTH - 150) / NUM_OF_ENEMY_2 / 2 + (
+        #                 (SCREEN_WIDTH - 150) / NUM_OF_ENEMY_2) * i
+        #     self.enemy_sprite.center_y = SCREEN_HEIGHT - 100
+        #     self.enemy_list.append(self.enemy_sprite)
+        #
+        # # Set up the enemies for list 3
+        # for i in range(NUM_OF_ENEMY_3):
+        #     self.enemy_sprite = Enemy("Enemy_3.png", ENEMY_SPRITE_SCALING)
+        #     self.enemy_sprite.center_x = 75 + + (SCREEN_WIDTH-150)/NUM_OF_ENEMY_3/2 + ((SCREEN_WIDTH-150)/NUM_OF_ENEMY_3)*i
+        #     self.enemy_sprite.center_y = SCREEN_HEIGHT - 50
+        #     self.enemy_list.append(self.enemy_sprite)
 
-        for i in range(NUM_OF_ENEMY_1):
-            self.enemy_sprite = Enemy("Enemy_1.png", scale=ENEMY_SPRITE_SCALING)
-            if NUM_OF_ENEMY_1 <= 6:
+        # Setup enemy sprites
+        enemy_1 = create_level_one_bug()
+        enemy_1.center_x = 40
+        enemy_1.center_y = 750
+        enemy_1.angle = 180
+        self.enemy_list.add_enemy(0, enemy_1)
 
-                self.enemy_sprite.center_x = 75 + (SCREEN_WIDTH-150)/7/2 + ((SCREEN_WIDTH-150)/NUM_OF_ENEMY_1)*i
-                self.enemy_sprite.center_y = SCREEN_HEIGHT - 200
-            else:
-                if i <= 6:
-                    spacing = (SCREEN_WIDTH-150)
-                    self.enemy_sprite.center_x = 75 + (SCREEN_WIDTH-150)/7/2 + ((SCREEN_WIDTH - 150)/7)*(i)
-                    self.enemy_sprite.center_y = SCREEN_HEIGHT - 200
-                else:
-                    self.enemy_sprite.center_x = 75+ (SCREEN_WIDTH-150)/(NUM_OF_ENEMY_1- 7)/2 + ((SCREEN_WIDTH - 150)/(NUM_OF_ENEMY_1- 7))*(i - 7)
-                    self.enemy_sprite.center_y = SCREEN_HEIGHT - 150
-
-            self.enemy_list.append(self.enemy_sprite)
-
-        # Set up the enemies for list 2
-        for i in range(NUM_OF_ENEMY_2):
-            self.enemy_sprite = Enemy("Enemy_2.png", ENEMY_SPRITE_SCALING)
-            self.enemy_sprite.center_x = 75 + + (SCREEN_WIDTH - 150) / NUM_OF_ENEMY_2 / 2 + (
-                        (SCREEN_WIDTH - 150) / NUM_OF_ENEMY_2) * i
-            self.enemy_sprite.center_y = SCREEN_HEIGHT - 100
-            self.enemy_list.append(self.enemy_sprite)
-
-        # Set up the enemies for list 3
-        for i in range(NUM_OF_ENEMY_3):
-            self.enemy_sprite = Enemy("Enemy_3.png", ENEMY_SPRITE_SCALING)
-            self.enemy_sprite.center_x = 75 + + (SCREEN_WIDTH-150)/NUM_OF_ENEMY_3/2 + ((SCREEN_WIDTH-150)/NUM_OF_ENEMY_3)*i
-            self.enemy_sprite.center_y = SCREEN_HEIGHT - 50
-            self.enemy_list.append(self.enemy_sprite)
+        enemy_2 = create_level_one_bug()
+        enemy_2.center_x = 500
+        enemy_2.center_y = 750
+        enemy_2.angle = 180
+        self.enemy_list.add_enemy(1, enemy_2)
 
         # Set up the player
         self.player_sprite = Player()
@@ -191,6 +240,8 @@ class MyGame(arcade.Window):
 
         self.clear()
 
+        #GAME PLAY DISPLAY
+
         for star in self.background_list:
             arcade.draw_circle_filled(star.x, star.y, star.size, arcade.color.YELLOW_ORANGE)
 
@@ -224,21 +275,47 @@ class MyGame(arcade.Window):
         self.player_bullet_list.update()
         self.player_list.update()
 
-        # Check stuff
+        # Check Collisions
         for bullet in self.enemy_bullet_list:
             # Bullet contact with player sprite
+            hits = arcade.check_for_collision_with_list(bullet, self.player_list)
+
+            if len(hits) > 0:
+                bullet.remove_from_sprite_lists()
+
+                # Player hurt and loses a life
+
+
 
             # Bullet is off the below screen
             if bullet.bottom < 0:
                 bullet.remove_from_sprite_lists()
 
+
         for bullet in self.player_bullet_list:
             # Bullet contact with enemy sprite
+            hits = arcade.check_for_collision_with_list(bullet, self.enemy_list)
+
+            if len(hits) > 0:
+                bullet.remove_from_sprite_lists()
+                for enemy_hit in hits:
+                    enemy_hit.hp -= bullet.damage
+                    if enemy_hit.hp <= 0:
+                        enemy_hit.remove_from_sprite_lists()
+                        # Explosion here
+
+            # Bullet is above the screen
             if bullet.bottom > SCREEN_HEIGHT:
                 bullet.remove_from_sprite_lists()
 
         # Move Enemy Ships
         self.enemy_list.update()
+
+        # Check if any enemies are ready to fire
+        for enemy in self.enemy_list:
+            if enemy.to_fire:
+                bullet = enemy.fire()
+                self.enemy_bullet_list.append(bullet)
         pass
 
     def on_key_press(self, key, key_modifiers):
@@ -276,10 +353,13 @@ class MyGame(arcade.Window):
 
 def main():
     """ Main function """
-    game = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-    game.setup()
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
+    start_view = StartScreen()
+    start_view.setup()
+    window.show_view(start_view)
     arcade.run()
 
 
 if __name__ == "__main__":
     main()
+
