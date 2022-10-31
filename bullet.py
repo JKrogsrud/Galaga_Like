@@ -2,6 +2,7 @@ import arcade
 
 BULLET_SCALE = 0.5
 
+
 class Bullet(arcade.Sprite):
     """
     Bullet class for use with weapons
