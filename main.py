@@ -8,18 +8,22 @@ If Python and Arcade are installed, this example can be run from the command lin
 python -m arcade.examples.starting_template
 """
 import arcade
-from weapon import Weapon
 from bullet import Bullet
 from player import Player
 from enemy import Enemy, create_level_one_bug, create_level_two_bug, create_level_three_bug
 from battle_line import Horizontal_Battle_Line
 import random
 import math
-import arcade.gui
 from arcade.experimental import Shadertoy
 
+FULL_SCREEN_HEIGHT = 700
 SCREEN_WIDTH = 500
-SCREEN_HEIGHT = 700
+SCREEN_HEIGHT = 680
+HUD_WIDTH = 500
+HUD_HEIGHT = 30
+HUD_X_CENTER = 250
+HUD_Y_CENTER = 685
+HUD_LIVES_START = 350
 ENEMY_SPRITE_SCALING = .0375
 PLAYER_SPRITE_SCALING = .5
 SCREEN_TITLE = "Galaga"
@@ -118,7 +122,7 @@ class MyGame(arcade.View):
     """
 
     def __init__(self, width, height, title):
-        super().__init__()
+        super().__init__(width, height, title)
 
         # If you have sprite lists, you should create them here,
         # and set them to None
@@ -129,6 +133,10 @@ class MyGame(arcade.View):
         self.player_bullet_list = None
         self.background_list = None
 
+        self.life_1 = None
+        self.life_2 = None
+        self.life_3 = None
+        self.life_4 = None
 
         # Loads a file and creates a shader from it
         #window_size = self.get_size()
@@ -158,7 +166,7 @@ class MyGame(arcade.View):
 
         # Create your sprites and sprite lists here
 
-        self.enemy_list = Horizontal_Battle_Line(speed=1, num_ships=10, left_pos=100, right_pos=400, depth=600)
+        self.enemy_list = arcade.SpriteList()
         self.enemy_bullet_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.player_bullet_list = arcade.SpriteList()
@@ -215,6 +223,20 @@ class MyGame(arcade.View):
         enemy_2.angle = 180
         self.enemy_list.add_enemy(1, enemy_2)
 
+        # set up spacing for lives
+        self.life_1 = arcade.Sprite("heart.png", scale=.07)
+        self.life_1.center_y = HUD_Y_CENTER
+        self.life_1.center_x = HUD_LIVES_START
+        self.life_2 = arcade.Sprite("heart.png", scale=.07)
+        self.life_2.center_y = HUD_Y_CENTER
+        self.life_2.center_x = HUD_LIVES_START + 25
+        self.life_3 = arcade.Sprite("heart.png", scale=.07)
+        self.life_3.center_y = HUD_Y_CENTER
+        self.life_3.center_x = HUD_LIVES_START + 50
+        self.life_4 = arcade.Sprite("heart.png", scale=.07)
+        self.life_4.center_y = HUD_Y_CENTER
+        self.life_4.center_x = HUD_LIVES_START + 75
+
         # Set up the player
         self.player_sprite = Player()
         self.player_sprite.center_x = int(SCREEN_WIDTH / 2)
@@ -262,6 +284,20 @@ class MyGame(arcade.View):
         self.enemy_bullet_list.draw()
         self.player_list.draw()
         self.player_bullet_list.draw()
+
+        # draw the HUD: level, points, lives
+        # arcade.draw_rectangle_filled(HUD_X_CENTER, HUD_Y_CENTER, HUD_WIDTH, HUD_HEIGHT, arcade.color.GREEN)
+        arcade.draw_text(f'LEVEL: {level}\t  SCORE: 0\t  LIVES:', 10, SCREEN_HEIGHT, arcade.color.GREEN, 12,
+                         width=(SCREEN_WIDTH-20), align="left", font_name="Kenney Rocket Square")
+        lives = 4
+        if lives > 0:
+            self.life_1.draw()
+            if lives > 1:
+                self.life_2.draw()
+                if lives > 2:
+                    self.life_3.draw()
+                    if lives > 3:
+                        self.life_4.draw()
 
         # Run the GLSL code
         #self.shadertoy.render()
@@ -426,7 +462,7 @@ class EndScreen(arcade.View):
 
 def main():
     """ Main function """
-    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
+    window = arcade.Window(SCREEN_WIDTH, FULL_SCREEN_HEIGHT, SCREEN_TITLE)
     start_view = StartScreen()
     start_view.setup()
     window.show_view(start_view)
@@ -435,4 +471,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
