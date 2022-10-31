@@ -276,11 +276,6 @@ class MyGame(arcade.View):
         self.bar_list.draw()
         self.top_label.draw()
 
-        level = 0
-        # draw the HUD: level, points, lives
-        # arcade.draw_rectangle_filled(HUD_X_CENTER, HUD_Y_CENTER, HUD_WIDTH, HUD_HEIGHT, arcade.color.GREEN)
-        arcade.draw_text(f'LEVEL: {level}\t  SCORE: 0\t', 10, SCREEN_HEIGHT, arcade.color.GREEN, 12,
-                         width=(SCREEN_WIDTH-20), align="left", font_name="Kenney Rocket Square")
         # Run the GLSL code
         # self.shadertoy.render()
         # self.shadertoy.render()
@@ -294,11 +289,6 @@ class MyGame(arcade.View):
         # check to see if the sprite is dead -> then exit the game
         if self.player_sprite.health <= 0:
             arcade.exit()
-
-        # update the indicator bar position
-       # self.player_sprite.indicator_bar.position = (
-       #     self.player_sprite.center_x, self.player_sprite.center_y + INDICATOR_BAR_OFFSET
-       # )
 
         # Animate all the stars falling
         for star in self.background_list:

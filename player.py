@@ -70,7 +70,7 @@ class IndicatorBar:
         self,
         owner: Player,
         sprite_list: arcade.SpriteList,
-        position: Tuple[float, float] = (300, 300),
+        position: Tuple[float, float] = (0, 0),
         full_color: arcade.Color = arcade.color.GREEN,
         background_color: arcade.Color = arcade.color.RED,
         width: int = 100,
@@ -105,7 +105,12 @@ class IndicatorBar:
 
         # Set the fullness and position of the bar
         self.fullness: float = 1.0
-        self.position: Tuple[float, float] = (280, 665)
+        self._center_x, self._center_y = (280, 665)
+        self.background_box.position = (280, 665)
+        self.full_box.position = (280, 665)
+
+        # Make sure full_box is to the left of the bar instead of the middle
+        self.full_box.left = self._center_x - (self._box_width // 2)
 
     def __repr__(self) -> str:
         return f"<IndicatorBar (Owner={self.owner})>"
@@ -150,14 +155,3 @@ class IndicatorBar:
         """Returns the current position of the bar."""
         return self._center_x, self._center_y
 
-    @position.setter
-    def position(self, new_position: Tuple[float, float]) -> None:
-        """Sets the new position of the bar."""
-        # Check if the position has changed. If so, change the bar's position
-        if new_position != self.position:
-            self._center_x, self._center_y = new_position
-            self.background_box.position = new_position
-            self.full_box.position = new_position
-
-            # Make sure full_box is to the left of the bar instead of the middle
-            self.full_box.left = self._center_x - (self._box_width // 2)
