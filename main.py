@@ -165,10 +165,10 @@ class MyGame(arcade.View):
 
             # Starting enemies
             enemy_row = Horizontal_Battle_Line(speed=1,
-                                                      num_ships=10,
-                                                      left_pos=120,
-                                                      right_pos=480,
-                                                      depth=350)
+                                               num_ships=10,
+                                               left_pos=120,
+                                               right_pos=480,
+                                               depth=350)
             for i in range(10):
                 enemy = create_level_one_bug(destination_list=curve_1)
                 enemy.center_x = -100 - (i * 40)
@@ -332,7 +332,7 @@ class MyGame(arcade.View):
                 # Spawn a middle row of 8 level 1 regular ships from right side
                 # Trajectory:
                 curve = parabolic_destination((SCREEN_WIDTH + 100, 750),
-                                              (SCREEN_WIDTH/2, 350),
+                                              (SCREEN_WIDTH/2, 390),
                                               30,
                                               -100)
                 # Battle Line
@@ -340,7 +340,7 @@ class MyGame(arcade.View):
                                                    num_ships=10,
                                                    left_pos=120,
                                                    right_pos=480,
-                                                   depth=350)
+                                                   depth=390)
                 for i in range(1, 9):
                     enemy = create_level_one_bug(destination_list=curve)
                     enemy.center_x = 100 + SCREEN_WIDTH + i*40
@@ -370,7 +370,71 @@ class MyGame(arcade.View):
 
             if self.time > 18 and self.wave == 2:
                 self.wave += 1
+                enemy_row = Horizontal_Battle_Line(speed=1,
+                                                   num_ships=8,
+                                                   left_pos=120,
+                                                   right_pos=480,
+                                                   depth=450)
+                upper_left_trajectory = parabolic_destination(entrance_loc=(-100, 430),
+                                                              turn_point=(10, 480),
+                                                              num_points=30,
+                                                              break_point=90)
+                lower_left_trajectory = parabolic_destination(entrance_loc=(-60, 500),
+                                                              turn_point=(100, 420),
+                                                              num_points=30,
+                                                              break_point=120)
+                upper_right_trajectory = parabolic_destination(entrance_loc=(SCREEN_WIDTH+100, 430),
+                                                               turn_point=(SCREEN_WIDTH-10, 480),
+                                                               num_points=30,
+                                                               break_point=SCREEN_WIDTH-90)
+                lower_right_trajectory = parabolic_destination(entrance_loc=(SCREEN_WIDTH + 60, 500),
+                                                               turn_point=(SCREEN_WIDTH-100, 430),
+                                                               num_points=30,
+                                                               break_point=SCREEN_WIDTH-150)
 
+                # Create Level 1 Ships and assign their place
+                enemy = create_level_one_bug(upper_left_trajectory)
+                enemy.center_x, enemy.center_y = -100, 430
+                enemy.angle = 180
+                enemy_row.add_enemy(0, enemy)
+
+                enemy = create_level_one_bug(upper_left_trajectory)
+                enemy.center_x, enemy.center_y = -140, 430
+                enemy.angle = 180
+                enemy_row.add_enemy(1, enemy)
+
+                enemy = create_level_one_bug(upper_right_trajectory)
+                enemy.center_x, enemy.center_y = SCREEN_WIDTH + 100, 430
+                enemy.angle = 180
+                enemy_row.add_enemy(7, enemy)
+
+                enemy = create_level_one_bug(upper_right_trajectory)
+                enemy.center_x, enemy.center_y = SCREEN_WIDTH + 140, 430
+                enemy.angle = 180
+                enemy_row.add_enemy(6, enemy)
+
+                # Create Level 2 Ships and assign their place
+                enemy = create_level_two_bug(lower_left_trajectory)
+                enemy.center_x, enemy.center_y = -120, 460
+                enemy.angle = 180
+                enemy_row.add_enemy(2, enemy)
+
+                enemy = create_level_two_bug(lower_left_trajectory)
+                enemy.center_x, enemy.center_y = -160, 460
+                enemy.angle = 180
+                enemy_row.add_enemy(3, enemy)
+
+                enemy = create_level_two_bug(lower_right_trajectory)
+                enemy.center_x, enemy.center_y = SCREEN_WIDTH + 120, 460
+                enemy.angle = 180
+                enemy_row.add_enemy(5, enemy)
+
+                enemy = create_level_two_bug(lower_right_trajectory)
+                enemy.center_x, enemy.center_y = SCREEN_WIDTH + 120, 460
+                enemy.angle = 180
+                enemy_row.add_enemy(4, enemy)
+
+                self.enemy_list.append(enemy_row)
 
 
         pass
