@@ -39,11 +39,11 @@ class Horizontal_Battle_Line(arcade.SpriteList):
     def update(self, delta_time: float = 1 / 60):
         # Update the positions of each enemy inside the formation
 
-        if self.right_pos > SCREEN_WIDTH - 10 and self.going_right:
+        if self.right_pos > SCREEN_WIDTH+20 and self.going_right:
             self.change_x = -self.speed
             self.going_right = False
 
-        elif self.left_pos < 10 and not self.going_right:
+        elif self.left_pos < 20 and not self.going_right:
             #  should start moving right
             self.change_x = self.speed
             self.going_right = True
@@ -57,7 +57,9 @@ class Horizontal_Battle_Line(arcade.SpriteList):
 
         # update the destinations for enemy ships
         for enemy in self.sprite_list:
-            if len(enemy.destination_list) == 1:
+            if enemy.move_state == 'charging' and enemy.charge_destination == None:
+                enemy.charge_destination = (enemy.center_x, -100)
+            elif len(enemy.destination_list) == 1:
                 enemy.destination_list.append(self.positions[enemy.position_in_battle_line][0])
             elif enemy.move_state == 'in_formation':
                 enemy.moving_right = self.going_right

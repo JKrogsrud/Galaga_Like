@@ -113,7 +113,7 @@ class MyGame(arcade.View):
         # If you have sprite lists, you should create them here,
         # and set them to None
 
-        self.enemy_list = None
+        self.enemy_list = []
         self.enemy_bullet_list = None
         self.player_list = None
         self.player_bullet_list = None
@@ -123,6 +123,18 @@ class MyGame(arcade.View):
         self.life_2 = None
         self.life_3 = None
         self.life_4 = None
+
+        self.level = 1
+
+        if self.level == 1:
+            self.wave_1 = False
+            self.wave_2 = False
+            self.wave_3 = False
+            self.wave_4 = False
+            self.wave_5 = False
+
+
+        self.time = 0
 
     def setup(self):
         """ Set up the game variables. Call to re-start the game. """
@@ -147,22 +159,29 @@ class MyGame(arcade.View):
 
         # Create your sprites and sprite lists here
 
-        self.enemy_list = Horizontal_Battle_Line(speed=1, num_ships=10, left_pos=120, right_pos=480, depth=600)
         self.enemy_bullet_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.player_bullet_list = arcade.SpriteList()
 
-        # Create a trajectory
-        curve_1 = parabolic_destination((-100, 750), (SCREEN_WIDTH/2, 400), 30, SCREEN_WIDTH+100)
+        if self.level == 1:
 
+            # Create a trajectory
+            curve_1 = parabolic_destination((-100, 750), (SCREEN_WIDTH/2, 250), 30, SCREEN_WIDTH+100)
 
-        for i in range(10):
-            enemy = create_level_one_bug(destination_list=curve_1)
-            enemy.center_x = -100 - (i * 40)
-            enemy.center_y = 750
-            enemy.angle = 180
-            self.enemy_list.add_enemy(i, enemy)
+            # Starting enemies
+            enemy_list_row_1 = Horizontal_Battle_Line(speed=1,
+                                                      num_ships=10,
+                                                      left_pos=120,
+                                                      right_pos=480,
+                                                      depth=350)
+            for i in range(10):
+                enemy = create_level_one_bug(destination_list=curve_1)
+                enemy.center_x = -100 - (i * 40)
+                enemy.center_y = 750
+                enemy.angle = 180
+                enemy_list_row_1.add_enemy(i, enemy)
 
+            self.enemy_list.append(enemy_list_row_1)
 
         # set up spacing for lives
         self.life_1 = arcade.Sprite("heart.png", scale=.07)
@@ -221,16 +240,16 @@ class MyGame(arcade.View):
             arcade.draw_circle_filled(star.x, star.y, star.size, arcade.color.YELLOW_ORANGE)
 
         # Call draw() on all your sprite lists below
-        self.enemy_list.draw()
+        for enemy_row in self.enemy_list:
+            enemy_row.draw()
         self.enemy_bullet_list.draw()
         self.player_list.draw()
         self.player_bullet_list.draw()
 
-        level = 1
 
         # draw the HUD: level, points, lives
         # arcade.draw_rectangle_filled(HUD_X_CENTER, HUD_Y_CENTER, HUD_WIDTH, HUD_HEIGHT, arcade.color.GREEN)
-        arcade.draw_text(f'LEVEL: {level}\t  SCORE: 0\t  LIVES:', 10, SCREEN_HEIGHT, arcade.color.GREEN, 12,
+        arcade.draw_text(f'LEVEL: {self.level}\t  SCORE: 0\t  LIVES:', 10, SCREEN_HEIGHT, arcade.color.GREEN, 12,
                          width=(SCREEN_WIDTH-20), align="left", font_name="Kenney Rocket Square")
         lives = 4
         if lives > 0:
@@ -282,28 +301,54 @@ class MyGame(arcade.View):
 
         for bullet in self.player_bullet_list:
             # Bullet contact with enemy sprite
-            hits = arcade.check_for_collision_with_list(bullet, self.enemy_list)
+            for enemy_row in self.enemy_list:
+                hits = arcade.check_for_collision_with_list(bullet, enemy_row)
 
-            if len(hits) > 0:
-                bullet.remove_from_sprite_lists()
-                for enemy_hit in hits:
-                    enemy_hit.hp -= bullet.damage
-                    if enemy_hit.hp <= 0:
-                        enemy_hit.remove_from_sprite_lists()
-                        # Explosion here
+                if len(hits) > 0:
+                    bullet.remove_from_sprite_lists()
+                    for enemy_hit in hits:
+                        enemy_hit.hp -= bullet.damage
+                        if enemy_hit.hp <= 0:
+                            enemy_hit.remove_from_sprite_lists()
+                            # Explosion here
 
             # Bullet is above the screen
             if bullet.bottom > SCREEN_HEIGHT:
                 bullet.remove_from_sprite_lists()
 
         # Move Enemy Ships
-        self.enemy_list.update()
+        for enemy_row in self.enemy_list:
+            enemy_row.update()
 
         # Check if any enemies are ready to fire
-        for enemy in self.enemy_list:
-            if enemy.to_fire:
-                bullet = enemy.fire()
-                self.enemy_bullet_list.append(bullet)
+        for enemy_row in self.enemy_list:
+            for enemy in enemy_row:
+                if enemy.to_fire:
+                    bullet = enemy.fire()
+                    self.enemy_bullet_list.append(bullet)
+
+        # Update the timer of the level so we can have new enemies spawn
+        self.time += delta_time
+
+        if self.level == 1:
+            if self.time > 20 and self.wave_1 == False:
+                self.wave_1 = True
+
+                # Spawn a middle row of 8 level 1 regular ships from right side
+                # Trajectory:
+                curve = parabolic_destination((SCREEN_WIDTH + 100, 750),
+                                              (SCREEN_WIDTH/2, 350),
+                                              30,
+                                              -100)
+                # Battle Line
+                enemy_row = Horizontal_Battle_Line(speed=1,
+                                                   num_ships=10,
+                                                   left_pos=120,
+                                                   right_pos=480,
+                                                   depth=350)
+                for i in range(1,9):
+                    enemy = create_level_one_bug(destination_list=curve)
+                    enemy.center_x = 100 +
         pass
 
     def on_key_press(self, key, key_modifiers):

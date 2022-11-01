@@ -21,7 +21,8 @@ class Enemy(arcade.Sprite):
                  hp=1,
                  time_between_firing=2.0,
                  speed_to_formation=2,
-                 speed_in_formation=2
+                 speed_in_formation=2,
+                 time_until_charge=10.0
                  ):
         super().__init__(filename=filename, scale=scale)
         self.hp = hp
@@ -36,8 +37,14 @@ class Enemy(arcade.Sprite):
         self.speed_in_formation = speed_in_formation
         self.move_state = 'initial'
         self.destination = self.destination_list[0]
+        self.time_until_charge = time_until_charge
+        self.lifetime = 0
+        self.charge_destination = None
 
     def update(self, delta_time: float = 1 / 60):
+        if self.center_y < 0:
+            self.remove_from_sprite_lists()
+
         if self.move_state == 'initial':
             # Move to destination
             delta_x = self.destination[0] - self.center_x
@@ -80,6 +87,7 @@ class Enemy(arcade.Sprite):
 
                 self.center_x += change_x
                 self.center_y += change_y
+
         elif self.move_state == 'in_formation':
             # Should move back and forth at a speed consistent with the battle line
             if self.moving_right:
@@ -87,9 +95,24 @@ class Enemy(arcade.Sprite):
             else:
                 self.center_x -= self.speed_in_formation
 
+        elif self.move_state == 'charging':
+            destination = self.charge_destination
+            delta_x = destination[0] - self.center_x
+            delta_y = destination[1] - self.center_y
+
+            dist = math.sqrt(delta_x ** 2 + delta_y ** 2)
+
+            change_x = (delta_x * self.speed_to_formation) / dist
+            change_y = (delta_y * self.speed_to_formation) / dist
+
+            self.center_x += change_x
+            self.center_y += change_y
+
+
+
         # Check if the enemy has fired recently
         self.time_since_last_firing += delta_time
-
+        self.lifetime += delta_time
         # Check this value against time_between_firing
         if self.time_since_last_firing >= self.time_between_firing:
 
@@ -98,6 +121,10 @@ class Enemy(arcade.Sprite):
 
             # Set need to fire as True
             self.to_fire = True
+
+        # Check if it's time to charge
+        if self.lifetime > self.time_until_charge:
+            self.move_state = 'charging'
 
     def fire(self):
         self.to_fire = False
@@ -114,7 +141,8 @@ def create_level_one_bug(destination_list):
                   weapon=enemy_weapon,
                   speed_to_formation=5,
                   destination_list=destination_list,
-                  time_between_firing= (random.random() % 4)+2)
+                  time_between_firing=(random.random() % 4) + 2,
+                  time_until_charge=(random.random() % 20) + 10)
     return copy.deepcopy(enemy)
 
 
@@ -127,8 +155,10 @@ def create_level_two_bug(destination_list):
                   weapon=enemy_weapon,
                   hp=2,
                   speed_to_formation=4,
-                  time_between_firing=1.5,
-                  destination_list=destination_list)
+                  destination_list=destination_list,
+                  time_between_firing=(random.random() % 3) + 2,
+                  time_until_charge=(random.random() % 20) + 15
+                  )
     return copy.deepcopy(enemy)
 
 def create_level_three_bug(destination_list):
