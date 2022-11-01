@@ -11,7 +11,7 @@ import arcade
 from bullet import Bullet
 from player import Player
 from enemy import Enemy, create_level_one_bug, create_level_two_bug, create_level_three_bug
-from battle_line import Horizontal_Battle_Line
+from battle_line import Horizontal_Battle_Line, parabolic_destination
 import random
 import math
 from arcade.experimental import Shadertoy
@@ -28,14 +28,6 @@ HUD_LIVES_START = 350
 ENEMY_SPRITE_SCALING = .0375
 PLAYER_SPRITE_SCALING = .5
 SCREEN_TITLE = "Galaga"
-
-# class Level_One:
-#     def __init__(self):
-#         battle_line_1 = Horizontal_Battle_Line()
-#         battle_line_2 = Horizontal_Battle_Line()
-#         battle_line_3 = Horizontal_Battle_Line()
-#         battle_line_4 = Horizontal_Battle_Line()
-#         battle_line_5 = Horizontal_Battle_Line()
 
 
 class Star:
@@ -114,13 +106,6 @@ class StartScreen(arcade.View):
         self.logo.draw()
 
 class MyGame(arcade.View):
-    """
-    Main application class.
-
-    NOTE: Go ahead and delete the methods you don't need.
-    If you do need a method, delete the 'pass' and replace it
-    with your own code. Don't leave 'pass' in this program.
-    """
 
     def __init__(self, width, height, title):
         super().__init__()
@@ -138,11 +123,6 @@ class MyGame(arcade.View):
         self.life_2 = None
         self.life_3 = None
         self.life_4 = None
-
-        # Loads a file and creates a shader from it
-        #window_size = self.get_size()
-        #self.shadertoy = Shadertoy.create_from_file(window_size, "Purple.glsl")
-
 
     def setup(self):
         """ Set up the game variables. Call to re-start the game. """
@@ -167,62 +147,22 @@ class MyGame(arcade.View):
 
         # Create your sprites and sprite lists here
 
-        self.enemy_list = Horizontal_Battle_Line(speed=1, num_ships=10, left_pos=100, right_pos=400, depth=600)
+        self.enemy_list = Horizontal_Battle_Line(speed=1, num_ships=10, left_pos=120, right_pos=480, depth=600)
         self.enemy_bullet_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.player_bullet_list = arcade.SpriteList()
 
-        # if level == 1 or level == 2:
-        #     num_of_enemies_1 = 6
-        # elif level == 3 or level == 4:
-        #     num_of_enemies_1 = 10
-        # else:
-        #     num_of_enemies_1 = 12
-        #
-        # for i in range(NUM_OF_ENEMY_1):
-        #     self.enemy_sprite = Enemy("Enemy_1.png", scale=ENEMY_SPRITE_SCALING)
-        #     if NUM_OF_ENEMY_1 <= 6:
-        #
-        #         self.enemy_sprite.center_x = 75 + (SCREEN_WIDTH-150)/7/2 + ((SCREEN_WIDTH-150)/NUM_OF_ENEMY_1)*i
-        #         self.enemy_sprite.center_y = SCREEN_HEIGHT - 200
-        #     else:
-        #         if i <= 6:
-        #             spacing = (SCREEN_WIDTH-150)
-        #             self.enemy_sprite.center_x = 75 + (SCREEN_WIDTH-150)/7/2 + ((SCREEN_WIDTH - 150)/7)*(i)
-        #             self.enemy_sprite.center_y = SCREEN_HEIGHT - 200
-        #         else:
-        #             self.enemy_sprite.center_x = 75+ (SCREEN_WIDTH-150)/(NUM_OF_ENEMY_1- 7)/2 + ((SCREEN_WIDTH - 150)/(NUM_OF_ENEMY_1- 7))*(i - 7)
-        #             self.enemy_sprite.center_y = SCREEN_HEIGHT - 150
-        #
-        #     self.enemy_list.append(self.enemy_sprite)
-        #
-        # # Set up the enemies for list 2
-        # for i in range(NUM_OF_ENEMY_2):
-        #     self.enemy_sprite = Enemy("Enemy_2.png", ENEMY_SPRITE_SCALING)
-        #     self.enemy_sprite.center_x = 75 + + (SCREEN_WIDTH - 150) / NUM_OF_ENEMY_2 / 2 + (
-        #                 (SCREEN_WIDTH - 150) / NUM_OF_ENEMY_2) * i
-        #     self.enemy_sprite.center_y = SCREEN_HEIGHT - 100
-        #     self.enemy_list.append(self.enemy_sprite)
-        #
-        # # Set up the enemies for list 3
-        # for i in range(NUM_OF_ENEMY_3):
-        #     self.enemy_sprite = Enemy("Enemy_3.png", ENEMY_SPRITE_SCALING)
-        #     self.enemy_sprite.center_x = 75 + + (SCREEN_WIDTH-150)/NUM_OF_ENEMY_3/2 + ((SCREEN_WIDTH-150)/NUM_OF_ENEMY_3)*i
-        #     self.enemy_sprite.center_y = SCREEN_HEIGHT - 50
-        #     self.enemy_list.append(self.enemy_sprite)
+        # Create a trajectory
+        curve_1 = parabolic_destination((-100, 750), (SCREEN_WIDTH/2, 400), 30, SCREEN_WIDTH+100)
 
-        # Setup enemy sprites
-        enemy_1 = create_level_one_bug()
-        enemy_1.center_x = 40
-        enemy_1.center_y = 750
-        enemy_1.angle = 180
-        self.enemy_list.add_enemy(0, enemy_1)
 
-        enemy_2 = create_level_one_bug()
-        enemy_2.center_x = 500
-        enemy_2.center_y = 750
-        enemy_2.angle = 180
-        self.enemy_list.add_enemy(1, enemy_2)
+        for i in range(10):
+            enemy = create_level_one_bug(destination_list=curve_1)
+            enemy.center_x = -100 - (i * 40)
+            enemy.center_y = 750
+            enemy.angle = 180
+            self.enemy_list.add_enemy(i, enemy)
+
 
         # set up spacing for lives
         self.life_1 = arcade.Sprite("heart.png", scale=.07)
@@ -302,9 +242,6 @@ class MyGame(arcade.View):
                     if lives > 3:
                         self.life_4.draw()
 
-        # Run the GLSL code
-        #self.shadertoy.render()
-        #self.shadertoy.render()
 
     def on_update(self, delta_time):
         """
