@@ -126,12 +126,7 @@ class MyGame(arcade.View):
 
         self.level = 1
 
-        if self.level == 1:
-            self.wave_1 = False
-            self.wave_2 = False
-            self.wave_3 = False
-            self.wave_4 = False
-            self.wave_5 = False
+        self.wave = 0
 
 
         self.time = 0
@@ -169,7 +164,7 @@ class MyGame(arcade.View):
             curve_1 = parabolic_destination((-100, 750), (SCREEN_WIDTH/2, 250), 30, SCREEN_WIDTH+100)
 
             # Starting enemies
-            enemy_list_row_1 = Horizontal_Battle_Line(speed=1,
+            enemy_row = Horizontal_Battle_Line(speed=1,
                                                       num_ships=10,
                                                       left_pos=120,
                                                       right_pos=480,
@@ -179,9 +174,9 @@ class MyGame(arcade.View):
                 enemy.center_x = -100 - (i * 40)
                 enemy.center_y = 750
                 enemy.angle = 180
-                enemy_list_row_1.add_enemy(i, enemy)
+                enemy_row.add_enemy(i, enemy)
 
-            self.enemy_list.append(enemy_list_row_1)
+            self.enemy_list.append(enemy_row)
 
         # set up spacing for lives
         self.life_1 = arcade.Sprite("heart.png", scale=.07)
@@ -331,8 +326,8 @@ class MyGame(arcade.View):
         self.time += delta_time
 
         if self.level == 1:
-            if self.time > 20 and self.wave_1 == False:
-                self.wave_1 = True
+            if self.time > 10 and self.wave==0:
+                self.wave += 1
 
                 # Spawn a middle row of 8 level 1 regular ships from right side
                 # Trajectory:
@@ -346,9 +341,38 @@ class MyGame(arcade.View):
                                                    left_pos=120,
                                                    right_pos=480,
                                                    depth=350)
-                for i in range(1,9):
+                for i in range(1, 9):
                     enemy = create_level_one_bug(destination_list=curve)
-                    enemy.center_x = 100 +
+                    enemy.center_x = 100 + SCREEN_WIDTH + i*40
+                    enemy.center_y = 650
+                    enemy.angle = 180
+                    enemy_row.add_enemy(9-i, enemy)
+
+                # New entry is at index 1
+                self.enemy_list.append(enemy_row)
+
+            if self.time > 14 and self.wave == 1:
+                self.wave += 1
+                destination_curve_1 = [(30, SCREEN_HEIGHT-30), (60, SCREEN_HEIGHT-90)]
+                destination_curve_2 = [(SCREEN_WIDTH-30, SCREEN_HEIGHT-30), (SCREEN_WIDTH-60, SCREEN_HEIGHT-90)]
+                enemy_1 = create_level_two_bug(destination_list=destination_curve_1)
+                enemy_1.center_x = -40
+                enemy_1.center_y = SCREEN_HEIGHT + 40
+                enemy_1.angle = 180
+
+                self.enemy_list[1].add_enemy(0, enemy_1)
+
+                enemy_2 = create_level_two_bug(destination_list=destination_curve_2)
+                enemy_2.center_x = SCREEN_WIDTH + 40
+                enemy_2.center_y = SCREEN_HEIGHT + 40
+                enemy_2.angle = 180
+                self.enemy_list[1].add_enemy(9, enemy_2)
+
+            if self.time > 18 and self.wave == 2:
+                self.wave += 1
+
+
+
         pass
 
     def on_key_press(self, key, key_modifiers):
