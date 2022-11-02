@@ -436,6 +436,167 @@ class MyGame(arcade.View):
 
                 self.enemy_list.append(enemy_row)
 
+            if self.time > 20 and self.wave == 3:
+                self.wave += 1
+
+                enemy_row = Horizontal_Battle_Line(speed=1,
+                                                   num_ships=10,
+                                                   left_pos=120,
+                                                   right_pos=480,
+                                                   depth=530)
+
+                trajectory = parabolic_destination(entrance_loc=(SCREEN_WIDTH/4, SCREEN_HEIGHT+50),
+                                                   turn_point=(SCREEN_WIDTH/2 + 20, SCREEN_HEIGHT/2 - 40),
+                                                   break_point=SCREEN_WIDTH/2,
+                                                   num_points=30)
+
+                for i in range(5, 10):
+                    enemy = create_level_one_bug(trajectory)
+                    enemy.center_x, enemy.center_y = (SCREEN_WIDTH/4, SCREEN_HEIGHT+50 + 40*i)
+                    enemy.angle = 180
+                    enemy_row.add_enemy(14-i, enemy)
+
+                trajectory_2 = parabolic_destination(entrance_loc=(1.25*SCREEN_WIDTH, SCREEN_HEIGHT),
+                                                     turn_point=(0.75*SCREEN_WIDTH, 0.25*SCREEN_HEIGHT),
+                                                     break_point=SCREEN_WIDTH/2,
+                                                     num_points=30)
+
+                for i in range(5):
+                    enemy = create_level_one_bug(trajectory_2)
+                    enemy.center_x, enemy.center_y = (1.25*SCREEN_WIDTH, SCREEN_HEIGHT + 200 + 40*i)
+                    enemy.angle = 180
+                    enemy_row.add_enemy(i, enemy)
+
+                self.enemy_list.append(enemy_row)
+
+            if self.time > 22 and self.wave == 4:
+                self.wave += 1
+                enemy_row = Horizontal_Battle_Line(speed=1,
+                                                   num_ships=10,
+                                                   left_pos=120,
+                                                   right_pos=480,
+                                                   depth=580)
+
+                trajectory_1 = parabolic_destination(entrance_loc=(SCREEN_WIDTH*1.25, SCREEN_HEIGHT*0.75),
+                                                     turn_point=(SCREEN_WIDTH, SCREEN_HEIGHT*1.25),
+                                                     break_point=SCREEN_WIDTH*0.9,
+                                                     num_points=30)
+
+                trajectory_2 = parabolic_destination(entrance_loc=(SCREEN_WIDTH*-.25, SCREEN_HEIGHT*0.75),
+                                                     turn_point=(1, SCREEN_HEIGHT*1.25),
+                                                     break_point=SCREEN_WIDTH*0.1,
+                                                     num_points=30)
+
+                for i in range(5):
+                    enemy = create_level_two_bug(trajectory_1)
+                    enemy.center_x, enemy.center_y = SCREEN_WIDTH*1.25 + 40 * i, SCREEN_HEIGHT*0.75
+                    enemy.angle = 180
+                    enemy_row.add_enemy(5+i, enemy)
+
+                for i in range(5, 10):
+                    enemy = create_level_two_bug(trajectory_2)
+                    enemy.center_x, enemy.center_y = SCREEN_WIDTH*-.25 - (i-5)*40, SCREEN_HEIGHT*0.75
+                    enemy.angle = 180
+                    enemy_row.add_enemy(9-i, enemy)
+
+                self.enemy_list.append(enemy_row)
+
+            if self.time > 25 and self.wave == 5:
+                self.wave += 1
+
+                # Last attack, introduce a couple level 3 bugs on top row flanked by 2 L2s
+                # Two rows of L1 bugs defend from front
+
+                # Big guy line
+                enemy_row_1 = Horizontal_Battle_Line(speed=1,
+                                                     num_ships=8,
+                                                     left_pos=120,
+                                                     right_pos=480,
+                                                     depth=650)
+
+                # Simple entrance
+                destination_curve_1 = [(SCREEN_WIDTH/2-40, 680)]
+                destination_curve_2 = [(SCREEN_WIDTH/2+40, 680)]
+
+                enemy = create_level_one_bug(destination_curve_1)
+                enemy.center_x, enemy.center_y = SCREEN_WIDTH/2-40, SCREEN_HEIGHT+40
+                enemy.angle = 180
+                enemy_row_1.add_enemy(0, enemy)
+
+                enemy = create_level_two_bug(destination_curve_1)
+                enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 - 40, SCREEN_HEIGHT + 80
+                enemy.angle = 180
+                enemy_row_1.add_enemy(1, enemy)
+
+                enemy = create_level_two_bug(destination_curve_1)
+                enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 - 40, SCREEN_HEIGHT + 120
+                enemy.angle = 180
+                enemy_row_1.add_enemy(2, enemy)
+
+                enemy = create_level_three_bug(destination_curve_1)
+                enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 - 40, SCREEN_HEIGHT + 160
+                enemy.angle = 180
+                enemy_row_1.add_enemy(3, enemy)
+
+                # 2nd half
+
+                enemy = create_level_one_bug(destination_curve_2)
+                enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 + 40, SCREEN_HEIGHT + 40
+                enemy.angle = 180
+                enemy_row_1.add_enemy(7, enemy)
+
+                enemy = create_level_two_bug(destination_curve_2)
+                enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 + 40, SCREEN_HEIGHT + 80
+                enemy.angle = 180
+                enemy_row_1.add_enemy(6, enemy)
+
+                enemy = create_level_two_bug(destination_curve_2)
+                enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 + 40, SCREEN_HEIGHT + 120
+                enemy.angle = 180
+                enemy_row_1.add_enemy(5, enemy)
+
+                enemy = create_level_three_bug(destination_curve_2)
+                enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 + 40, SCREEN_HEIGHT + 160
+                enemy.angle = 180
+                enemy_row_1.add_enemy(4, enemy)
+
+                # Battle_formation
+
+                enemy_row_2 = Horizontal_Battle_Line(speed=1,
+                                                     num_ships=10,
+                                                     left_pos=120,
+                                                     right_pos=480,
+                                                     depth=400)
+
+                # Add front line enemies
+                trajectory_front = [(-40, 400), (-40, 450), (SCREEN_WIDTH+40, 450), (SCREEN_WIDTH+40, 400)]
+
+                for i in range(10):
+                    enemy = create_level_one_bug(trajectory_front)
+                    enemy.center_x, enemy.center_y = SCREEN_WIDTH + 40 + 40*i, 400
+                    enemy.angle = 180
+                    enemy_row_2.add_enemy(i,enemy)
+
+                # Battle_formation 3
+
+                enemy_row_3 = Horizontal_Battle_Line(speed=1,
+                                                     num_ships=10,
+                                                     left_pos=120,
+                                                     right_pos=480,
+                                                     depth=350)
+
+                # Add front line enemies
+                trajectory_front = [(SCREEN_WIDTH+40, 350), (SCREEN_WIDTH + 40, 300), (-40, 300), (-40, 350)]
+
+                for i in range(10):
+                    enemy = create_level_one_bug(trajectory_front)
+                    enemy.center_x, enemy.center_y = -40 - (40 * i), 350
+                    enemy.angle = 180
+                    enemy_row_3.add_enemy(9-i, enemy)
+
+                self.enemy_list.append(enemy_row_1)
+                self.enemy_list.append(enemy_row_2)
+                self.enemy_list.append(enemy_row_3)
 
         pass
 
