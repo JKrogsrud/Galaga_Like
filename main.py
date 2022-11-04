@@ -29,6 +29,7 @@ ENEMY_SPRITE_SCALING = .0375
 PLAYER_SPRITE_SCALING = .5
 SCREEN_TITLE = "Galaga"
 
+INDICATOR_BAR_OFFSET = 32
 
 class Star:
     def __init__(self):
@@ -48,7 +49,6 @@ class StartButton(arcade.gui.UIFlatButton):
         game_view = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
         game_view.setup()
         game_view.window.show_view(game_view)
-
 
 class EndButton(arcade.gui.UIFlatButton):
 
@@ -106,6 +106,13 @@ class StartScreen(arcade.View):
         self.logo.draw()
 
 class MyGame(arcade.View):
+    """
+    Main application class.
+
+    NOTE: Go ahead and delete the methods you don't need.
+    If you do need a method, delete the 'pass' and replace it
+    with your own code. Don't leave 'pass' in this program.
+    """
 
     def __init__(self, width, height, title):
         super().__init__()
@@ -119,15 +126,14 @@ class MyGame(arcade.View):
         self.player_bullet_list = None
         self.background_list = None
 
-        self.life_1 = None
-        self.life_2 = None
-        self.life_3 = None
-        self.life_4 = None
+        # sprites for player health
+        self.bar_list = None
+        self.player_sprite = None
+        self.top_label = None
 
         self.level = 1
 
         self.wave = 0
-
 
         self.time = 0
 
@@ -158,22 +164,15 @@ class MyGame(arcade.View):
         self.player_list = arcade.SpriteList()
         self.player_bullet_list = arcade.SpriteList()
 
-        # set up spacing for lives
-        self.life_1 = arcade.Sprite("heart.png", scale=.07)
-        self.life_1.center_y = HUD_Y_CENTER
-        self.life_1.center_x = HUD_LIVES_START
-        self.life_2 = arcade.Sprite("heart.png", scale=.07)
-        self.life_2.center_y = HUD_Y_CENTER
-        self.life_2.center_x = HUD_LIVES_START + 25
-        self.life_3 = arcade.Sprite("heart.png", scale=.07)
-        self.life_3.center_y = HUD_Y_CENTER
-        self.life_3.center_x = HUD_LIVES_START + 50
-        self.life_4 = arcade.Sprite("heart.png", scale=.07)
-        self.life_4.center_y = HUD_Y_CENTER
-        self.life_4.center_x = HUD_LIVES_START + 75
+        # set up player health
+        self.bar_list = arcade.SpriteList()
+        self.top_label: arcade.Text = arcade.Text(
+            f'LEVEL: {0}\t  HEALTH: \t                   SCORE: 0', 10, SCREEN_HEIGHT-20, arcade.color.GREEN, 11,
+            width=(SCREEN_WIDTH - 20), align="left", font_name="Kenney Rocket Square"
+        )
 
         # Set up the player
-        self.player_sprite = Player()
+        self.player_sprite = Player(self.bar_list)
         self.player_sprite.center_x = int(SCREEN_WIDTH / 2)
         self.player_sprite.center_y = 40
         self.player_list.append(self.player_sprite)
@@ -209,7 +208,7 @@ class MyGame(arcade.View):
 
         self.clear()
 
-        #GAME PLAY DISPLAY
+        # GAME PLAY DISPLAY
 
         for star in self.background_list:
             arcade.draw_circle_filled(star.x, star.y, star.size, arcade.color.YELLOW_ORANGE)
@@ -221,21 +220,9 @@ class MyGame(arcade.View):
         self.player_list.draw()
         self.player_bullet_list.draw()
 
-
-        # draw the HUD: level, points, lives
-        # arcade.draw_rectangle_filled(HUD_X_CENTER, HUD_Y_CENTER, HUD_WIDTH, HUD_HEIGHT, arcade.color.GREEN)
-        arcade.draw_text(f'LEVEL: {self.level}\t  SCORE: 0\t  LIVES:', 10, SCREEN_HEIGHT, arcade.color.GREEN, 12,
-                         width=(SCREEN_WIDTH-20), align="left", font_name="Kenney Rocket Square")
-        lives = 4
-        if lives > 0:
-            self.life_1.draw()
-            if lives > 1:
-                self.life_2.draw()
-                if lives > 2:
-                    self.life_3.draw()
-                    if lives > 3:
-                        self.life_4.draw()
-
+        # draw the player health bar and top label text
+        self.bar_list.draw()
+        self.top_label.draw()
 
     def on_update(self, delta_time):
         """
@@ -243,6 +230,10 @@ class MyGame(arcade.View):
         Normally, you'll call update() on the sprite lists that
         need it.
         """
+        # check to see if the sprite is dead -> then exit the game
+        if self.player_sprite.health <= 0:
+            arcade.exit()
+
         # Animate all the stars falling
         for star in self.background_list:
             star.y -= star.speed * delta_time
@@ -251,13 +242,12 @@ class MyGame(arcade.View):
             if star.y < 0:
                 star.reset_pos()
 
-
         # Call update on bullet sprites
         self.enemy_bullet_list.update()
         self.player_bullet_list.update()
         self.player_list.update()
 
-        # Check stuff
+        # Check Collisions
         for bullet in self.enemy_bullet_list:
             # Bullet contact with player sprite
             hits = arcade.check_for_collision_with_list(bullet, self.player_list)
@@ -265,9 +255,12 @@ class MyGame(arcade.View):
             if len(hits) > 0:
                 bullet.remove_from_sprite_lists()
 
-                # Player hurt and loses a life
-
-
+                # Player hurt and has damage done
+                self.player_sprite.health -= bullet.damage
+                # reset indicator bar fullness
+                self.player_sprite.indicator_bar.fullness = (
+                    self.player_sprite.health / 5
+                )
 
             # Bullet is off the below screen
             if bullet.bottom < 0:
@@ -310,7 +303,7 @@ class MyGame(arcade.View):
                 self.wave += 1
                 # Create a trajectory
                 curve_1 = parabolic_destination((-100, 750), (SCREEN_WIDTH / 2, 250), 30, SCREEN_WIDTH + 100)
-    
+
                 # Starting enemies
                 enemy_row = Horizontal_Battle_Line(speed=1,
                                                    num_ships=10,
@@ -323,9 +316,9 @@ class MyGame(arcade.View):
                     enemy.center_y = 750
                     enemy.angle = 180
                     enemy_row.add_enemy(i, enemy)
-    
+
                 self.enemy_list.append(enemy_row)
-                
+
             if self.time > 10 and self.wave==1:
                 self.wave += 1
 
@@ -597,10 +590,10 @@ class MyGame(arcade.View):
                 self.enemy_list.append(enemy_row_1)
                 self.enemy_list.append(enemy_row_2)
                 self.enemy_list.append(enemy_row_3)
-        
+
         if self.level == 2:
-            pass 
-        
+            pass
+
         pass
 
     def on_key_press(self, key, key_modifiers):
@@ -699,7 +692,7 @@ class EndScreen(arcade.View):
 
 def main():
     """ Main function """
-    window = arcade.Window(SCREEN_WIDTH, FULL_SCREEN_HEIGHT, SCREEN_TITLE)
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
     start_view = StartScreen()
     start_view.setup()
     window.show_view(start_view)

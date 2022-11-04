@@ -9,6 +9,7 @@ that will be used in the game.
 It should know where the player / enemy sprite is so pass in those locations
 """
 
+
 class Weapon():
     def __init__(self, image=None,
                  friendly=True,
@@ -22,7 +23,6 @@ class Weapon():
         self.ammo = ammo
         self.bullet_type = bullet_type
         self.bullet_speed = bullet_speed
-
 
     def fire(self, x_loc, y_loc):
         # Create Bullet object
