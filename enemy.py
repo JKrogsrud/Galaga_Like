@@ -132,7 +132,7 @@ class Enemy(arcade.Sprite):
         return bullet
 
 
-def create_level_one_bug(destination_list):
+def create_random_level_one_bug(destination_list):
     goo_shot = Bullet(filename="goo_shot_1.png",
                       speed=10)
     enemy_weapon = Weapon(friendly=False, requires_ammo=False, bullet_type=goo_shot, bullet_speed=10)
@@ -141,12 +141,12 @@ def create_level_one_bug(destination_list):
                   weapon=enemy_weapon,
                   speed_to_formation=5,
                   destination_list=destination_list,
-                  time_between_firing=(random.random() % 4) + 2,
+                  time_between_firing=(random.random() % 4) + 3,
                   time_until_charge=(random.random() % 20) + 10)
     return copy.deepcopy(enemy)
 
 
-def create_level_two_bug(destination_list):
+def create_random_level_two_bug(destination_list):
     goo_shot = Bullet(filename="goo_shot_1.png",
                       speed=12)
     enemy_weapon = Weapon(friendly=False, requires_ammo=False, bullet_type=goo_shot, bullet_speed=12)
@@ -156,12 +156,12 @@ def create_level_two_bug(destination_list):
                   hp=2,
                   speed_to_formation=4,
                   destination_list=destination_list,
-                  time_between_firing=(random.random() % 3) + 2,
+                  time_between_firing=(random.random() % 4) + 2,
                   time_until_charge=(random.random() % 20) + 15
                   )
     return copy.deepcopy(enemy)
 
-def create_level_three_bug(destination_list):
+def create_random_level_three_bug(destination_list):
     goo_shot = Bullet(filename="goo_shot_1.png",
                       speed=14)
     enemy_weapon = Weapon(friendly=False, requires_ammo=False, bullet_type=goo_shot, bullet_speed=14)

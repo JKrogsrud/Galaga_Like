@@ -10,7 +10,7 @@ python -m arcade.examples.starting_template
 import arcade
 from bullet import Bullet
 from player import Player
-from enemy import Enemy, create_level_one_bug, create_level_two_bug, create_level_three_bug
+from enemy import Enemy, create_random_level_one_bug, create_random_level_two_bug, create_random_level_three_bug
 from battle_line import Horizontal_Battle_Line, parabolic_destination
 import random
 import math
@@ -157,26 +157,6 @@ class MyGame(arcade.View):
         self.enemy_bullet_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.player_bullet_list = arcade.SpriteList()
-
-        if self.level == 1:
-
-            # Create a trajectory
-            curve_1 = parabolic_destination((-100, 750), (SCREEN_WIDTH/2, 250), 30, SCREEN_WIDTH+100)
-
-            # Starting enemies
-            enemy_row = Horizontal_Battle_Line(speed=1,
-                                               num_ships=10,
-                                               left_pos=120,
-                                               right_pos=480,
-                                               depth=350)
-            for i in range(10):
-                enemy = create_level_one_bug(destination_list=curve_1)
-                enemy.center_x = -100 - (i * 40)
-                enemy.center_y = 750
-                enemy.angle = 180
-                enemy_row.add_enemy(i, enemy)
-
-            self.enemy_list.append(enemy_row)
 
         # set up spacing for lives
         self.life_1 = arcade.Sprite("heart.png", scale=.07)
@@ -326,7 +306,27 @@ class MyGame(arcade.View):
         self.time += delta_time
 
         if self.level == 1:
-            if self.time > 10 and self.wave==0:
+            if self.time > 0 and self.wave == 0:
+                self.wave += 1
+                # Create a trajectory
+                curve_1 = parabolic_destination((-100, 750), (SCREEN_WIDTH / 2, 250), 30, SCREEN_WIDTH + 100)
+    
+                # Starting enemies
+                enemy_row = Horizontal_Battle_Line(speed=1,
+                                                   num_ships=10,
+                                                   left_pos=120,
+                                                   right_pos=480,
+                                                   depth=350)
+                for i in range(10):
+                    enemy = create_random_level_one_bug(destination_list=curve_1)
+                    enemy.center_x = -100 - (i * 40)
+                    enemy.center_y = 750
+                    enemy.angle = 180
+                    enemy_row.add_enemy(i, enemy)
+    
+                self.enemy_list.append(enemy_row)
+                
+            if self.time > 10 and self.wave==1:
                 self.wave += 1
 
                 # Spawn a middle row of 8 level 1 regular ships from right side
@@ -342,7 +342,7 @@ class MyGame(arcade.View):
                                                    right_pos=480,
                                                    depth=390)
                 for i in range(1, 9):
-                    enemy = create_level_one_bug(destination_list=curve)
+                    enemy = create_random_level_one_bug(destination_list=curve)
                     enemy.center_x = 100 + SCREEN_WIDTH + i*40
                     enemy.center_y = 650
                     enemy.angle = 180
@@ -351,24 +351,24 @@ class MyGame(arcade.View):
                 # New entry is at index 1
                 self.enemy_list.append(enemy_row)
 
-            if self.time > 14 and self.wave == 1:
+            if self.time > 14 and self.wave == 2:
                 self.wave += 1
                 destination_curve_1 = [(30, SCREEN_HEIGHT-30), (60, SCREEN_HEIGHT-90)]
                 destination_curve_2 = [(SCREEN_WIDTH-30, SCREEN_HEIGHT-30), (SCREEN_WIDTH-60, SCREEN_HEIGHT-90)]
-                enemy_1 = create_level_two_bug(destination_list=destination_curve_1)
+                enemy_1 = create_random_level_two_bug(destination_list=destination_curve_1)
                 enemy_1.center_x = -40
                 enemy_1.center_y = SCREEN_HEIGHT + 40
                 enemy_1.angle = 180
 
                 self.enemy_list[1].add_enemy(0, enemy_1)
 
-                enemy_2 = create_level_two_bug(destination_list=destination_curve_2)
+                enemy_2 = create_random_level_two_bug(destination_list=destination_curve_2)
                 enemy_2.center_x = SCREEN_WIDTH + 40
                 enemy_2.center_y = SCREEN_HEIGHT + 40
                 enemy_2.angle = 180
                 self.enemy_list[1].add_enemy(9, enemy_2)
 
-            if self.time > 18 and self.wave == 2:
+            if self.time > 18 and self.wave == 3:
                 self.wave += 1
                 enemy_row = Horizontal_Battle_Line(speed=1,
                                                    num_ships=8,
@@ -393,50 +393,50 @@ class MyGame(arcade.View):
                                                                break_point=SCREEN_WIDTH-150)
 
                 # Create Level 1 Ships and assign their place
-                enemy = create_level_one_bug(upper_left_trajectory)
+                enemy = create_random_level_one_bug(upper_left_trajectory)
                 enemy.center_x, enemy.center_y = -100, 430
                 enemy.angle = 180
                 enemy_row.add_enemy(0, enemy)
 
-                enemy = create_level_one_bug(upper_left_trajectory)
+                enemy = create_random_level_one_bug(upper_left_trajectory)
                 enemy.center_x, enemy.center_y = -140, 430
                 enemy.angle = 180
                 enemy_row.add_enemy(1, enemy)
 
-                enemy = create_level_one_bug(upper_right_trajectory)
+                enemy = create_random_level_one_bug(upper_right_trajectory)
                 enemy.center_x, enemy.center_y = SCREEN_WIDTH + 100, 430
                 enemy.angle = 180
                 enemy_row.add_enemy(7, enemy)
 
-                enemy = create_level_one_bug(upper_right_trajectory)
+                enemy = create_random_level_one_bug(upper_right_trajectory)
                 enemy.center_x, enemy.center_y = SCREEN_WIDTH + 140, 430
                 enemy.angle = 180
                 enemy_row.add_enemy(6, enemy)
 
                 # Create Level 2 Ships and assign their place
-                enemy = create_level_two_bug(lower_left_trajectory)
+                enemy = create_random_level_two_bug(lower_left_trajectory)
                 enemy.center_x, enemy.center_y = -120, 460
                 enemy.angle = 180
                 enemy_row.add_enemy(2, enemy)
 
-                enemy = create_level_two_bug(lower_left_trajectory)
+                enemy = create_random_level_two_bug(lower_left_trajectory)
                 enemy.center_x, enemy.center_y = -160, 460
                 enemy.angle = 180
                 enemy_row.add_enemy(3, enemy)
 
-                enemy = create_level_two_bug(lower_right_trajectory)
+                enemy = create_random_level_two_bug(lower_right_trajectory)
                 enemy.center_x, enemy.center_y = SCREEN_WIDTH + 120, 460
                 enemy.angle = 180
                 enemy_row.add_enemy(5, enemy)
 
-                enemy = create_level_two_bug(lower_right_trajectory)
+                enemy = create_random_level_two_bug(lower_right_trajectory)
                 enemy.center_x, enemy.center_y = SCREEN_WIDTH + 120, 460
                 enemy.angle = 180
                 enemy_row.add_enemy(4, enemy)
 
                 self.enemy_list.append(enemy_row)
 
-            if self.time > 20 and self.wave == 3:
+            if self.time > 20 and self.wave == 4:
                 self.wave += 1
 
                 enemy_row = Horizontal_Battle_Line(speed=1,
@@ -451,7 +451,7 @@ class MyGame(arcade.View):
                                                    num_points=30)
 
                 for i in range(5, 10):
-                    enemy = create_level_one_bug(trajectory)
+                    enemy = create_random_level_one_bug(trajectory)
                     enemy.center_x, enemy.center_y = (SCREEN_WIDTH/4, SCREEN_HEIGHT+50 + 40*i)
                     enemy.angle = 180
                     enemy_row.add_enemy(14-i, enemy)
@@ -462,14 +462,14 @@ class MyGame(arcade.View):
                                                      num_points=30)
 
                 for i in range(5):
-                    enemy = create_level_one_bug(trajectory_2)
+                    enemy = create_random_level_one_bug(trajectory_2)
                     enemy.center_x, enemy.center_y = (1.25*SCREEN_WIDTH, SCREEN_HEIGHT + 200 + 40*i)
                     enemy.angle = 180
                     enemy_row.add_enemy(i, enemy)
 
                 self.enemy_list.append(enemy_row)
 
-            if self.time > 22 and self.wave == 4:
+            if self.time > 22 and self.wave == 5:
                 self.wave += 1
                 enemy_row = Horizontal_Battle_Line(speed=1,
                                                    num_ships=10,
@@ -488,20 +488,20 @@ class MyGame(arcade.View):
                                                      num_points=30)
 
                 for i in range(5):
-                    enemy = create_level_two_bug(trajectory_1)
+                    enemy = create_random_level_two_bug(trajectory_1)
                     enemy.center_x, enemy.center_y = SCREEN_WIDTH*1.25 + 40 * i, SCREEN_HEIGHT*0.75
                     enemy.angle = 180
                     enemy_row.add_enemy(5+i, enemy)
 
                 for i in range(5, 10):
-                    enemy = create_level_two_bug(trajectory_2)
+                    enemy = create_random_level_two_bug(trajectory_2)
                     enemy.center_x, enemy.center_y = SCREEN_WIDTH*-.25 - (i-5)*40, SCREEN_HEIGHT*0.75
                     enemy.angle = 180
                     enemy_row.add_enemy(9-i, enemy)
 
                 self.enemy_list.append(enemy_row)
 
-            if self.time > 25 and self.wave == 5:
+            if self.time > 25 and self.wave == 6:
                 self.wave += 1
 
                 # Last attack, introduce a couple level 3 bugs on top row flanked by 2 L2s
@@ -518,44 +518,44 @@ class MyGame(arcade.View):
                 destination_curve_1 = [(SCREEN_WIDTH/2-40, 680)]
                 destination_curve_2 = [(SCREEN_WIDTH/2+40, 680)]
 
-                enemy = create_level_one_bug(destination_curve_1)
+                enemy = create_random_level_one_bug(destination_curve_1)
                 enemy.center_x, enemy.center_y = SCREEN_WIDTH/2-40, SCREEN_HEIGHT+40
                 enemy.angle = 180
                 enemy_row_1.add_enemy(0, enemy)
 
-                enemy = create_level_two_bug(destination_curve_1)
+                enemy = create_random_level_two_bug(destination_curve_1)
                 enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 - 40, SCREEN_HEIGHT + 80
                 enemy.angle = 180
                 enemy_row_1.add_enemy(1, enemy)
 
-                enemy = create_level_two_bug(destination_curve_1)
+                enemy = create_random_level_two_bug(destination_curve_1)
                 enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 - 40, SCREEN_HEIGHT + 120
                 enemy.angle = 180
                 enemy_row_1.add_enemy(2, enemy)
 
-                enemy = create_level_three_bug(destination_curve_1)
+                enemy = create_random_level_three_bug(destination_curve_1)
                 enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 - 40, SCREEN_HEIGHT + 160
                 enemy.angle = 180
                 enemy_row_1.add_enemy(3, enemy)
 
                 # 2nd half
 
-                enemy = create_level_one_bug(destination_curve_2)
+                enemy = create_random_level_one_bug(destination_curve_2)
                 enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 + 40, SCREEN_HEIGHT + 40
                 enemy.angle = 180
                 enemy_row_1.add_enemy(7, enemy)
 
-                enemy = create_level_two_bug(destination_curve_2)
+                enemy = create_random_level_two_bug(destination_curve_2)
                 enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 + 40, SCREEN_HEIGHT + 80
                 enemy.angle = 180
                 enemy_row_1.add_enemy(6, enemy)
 
-                enemy = create_level_two_bug(destination_curve_2)
+                enemy = create_random_level_two_bug(destination_curve_2)
                 enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 + 40, SCREEN_HEIGHT + 120
                 enemy.angle = 180
                 enemy_row_1.add_enemy(5, enemy)
 
-                enemy = create_level_three_bug(destination_curve_2)
+                enemy = create_random_level_three_bug(destination_curve_2)
                 enemy.center_x, enemy.center_y = SCREEN_WIDTH / 2 + 40, SCREEN_HEIGHT + 160
                 enemy.angle = 180
                 enemy_row_1.add_enemy(4, enemy)
@@ -572,7 +572,7 @@ class MyGame(arcade.View):
                 trajectory_front = [(-40, 400), (-40, 450), (SCREEN_WIDTH+40, 450), (SCREEN_WIDTH+40, 400)]
 
                 for i in range(10):
-                    enemy = create_level_one_bug(trajectory_front)
+                    enemy = create_random_level_one_bug(trajectory_front)
                     enemy.center_x, enemy.center_y = SCREEN_WIDTH + 40 + 40*i, 400
                     enemy.angle = 180
                     enemy_row_2.add_enemy(i,enemy)
@@ -589,7 +589,7 @@ class MyGame(arcade.View):
                 trajectory_front = [(SCREEN_WIDTH+40, 350), (SCREEN_WIDTH + 40, 300), (-40, 300), (-40, 350)]
 
                 for i in range(10):
-                    enemy = create_level_one_bug(trajectory_front)
+                    enemy = create_random_level_one_bug(trajectory_front)
                     enemy.center_x, enemy.center_y = -40 - (40 * i), 350
                     enemy.angle = 180
                     enemy_row_3.add_enemy(9-i, enemy)
@@ -597,7 +597,10 @@ class MyGame(arcade.View):
                 self.enemy_list.append(enemy_row_1)
                 self.enemy_list.append(enemy_row_2)
                 self.enemy_list.append(enemy_row_3)
-
+        
+        if self.level == 2:
+            pass 
+        
         pass
 
     def on_key_press(self, key, key_modifiers):
