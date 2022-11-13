@@ -111,17 +111,31 @@ class StartScreen(arcade.View):
         self.manager.draw()
         self.logo.draw()
 
-# class HighScore(arcade.View):
-#
-#     """This function will display the top 10. scores of the game"""
-#     def setup(self):
-#         self.logo = arcade.Sprite("Galaga.png", .15)
-#         self.logo.center_x = SCREEN_WIDTH/2
-#         self.logo.center_y = SCREEN_HEIGHT - 200
-#
-#     def on_show_view(self):
-#         """Sets up the Highscore screen"""
-# 
+class HighScore(arcade.View):
+    highscore_dict = {}
+    """This function will display the top 10. scores of the game"""
+    def setup(self):
+        try:
+
+            with open('205-galaga/high_scores.txt','r') as f:
+                line = f.readline()
+                user = line.split(",")[0]
+                score = line.split(",")[1]
+
+                highscore_dict[user] = score
+        except FileNotFoundError:
+            print("File does not exist")
+
+    def on_show_view(self):
+        """Sets up the Highscore screen"""
+        start_x = SCREEN_WIDTH / 2
+        start_y = SCREEN_HEIGHT - 200
+        arcade.draw_text("GAME OVER", start_x, start_y, arcade.color.FRENCH_WINE, 50, align="center")
+
+        for i in highscore_dict:
+            print(i)
+
+
 
 class MyGame(arcade.View):
     """
