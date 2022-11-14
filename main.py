@@ -378,10 +378,6 @@ class MyGame(arcade.View):
                     self.player_sprite.health / 5
                 )
 
-            # Bullet is off the below screen
-            if bullet.top < 0:
-                bullet.remove_from_sprite_lists()
-
             for bullet in self.player_bullet_list:
                 # Bullet contact with enemy sprite
                 for enemy_row in self.enemy_list:
@@ -397,9 +393,10 @@ class MyGame(arcade.View):
                                 enemy_hit.remove_from_sprite_lists()
                                 # Explosion here
 
-                # Bullet is above the screen
-                if bullet.bottom > SCREEN_HEIGHT:
+                # Bullet is off the below screen
+                if bullet.top < 0:
                     bullet.remove_from_sprite_lists()
+
         else:
             # decrease cooldown time
             self.cooldown_time -= delta_time
