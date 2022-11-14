@@ -1,7 +1,6 @@
 import arcade
 from typing import Tuple
 
-
 from weapon import Weapon
 from bullet import Bullet
 
