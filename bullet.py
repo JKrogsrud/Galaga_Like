@@ -12,10 +12,10 @@ class Bullet(arcade.Sprite):
                  center_x=0,
                  damage=1,
                  speed=10,
-                 friendly=True):
-        super().__init__(filename=filename, center_x=center_x, center_y=center_y)
+                 friendly=True,
+                 scale=BULLET_SCALE):
+        super().__init__(filename=filename, center_x=center_x, center_y=center_y, scale=scale)
         self.damage = damage
-        self.scale = BULLET_SCALE
         self.speed = speed
         self.friendly = friendly
 
