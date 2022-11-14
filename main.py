@@ -28,8 +28,10 @@ HUD_LIVES_START = 350
 ENEMY_SPRITE_SCALING = .0375
 PLAYER_SPRITE_SCALING = .5
 SCREEN_TITLE = "Galaga"
+COOLDOWN_DEFAULT = 3
 
 INDICATOR_BAR_OFFSET = 32
+
 
 class Star:
     def __init__(self):
@@ -41,6 +43,7 @@ class Star:
         self.y = random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT + 100)
         self.x = random.randrange(SCREEN_WIDTH)
 
+
 class StartButton(arcade.gui.UIFlatButton):
     """
     StartButton class for start screen
@@ -50,12 +53,14 @@ class StartButton(arcade.gui.UIFlatButton):
         game_view.setup()
         game_view.window.show_view(game_view)
 
+
 class EndButton(arcade.gui.UIFlatButton):
 
     def on_click(self, event: arcade.gui.UIOnClickEvent):
         game_view = EndScreen()
         game_view.setup()
         game_view.window.show_view(game_view)
+
 
 class StartScreen(arcade.View):
 
@@ -87,8 +92,8 @@ class StartScreen(arcade.View):
 
         start_button_1 = StartButton(text="One Player", width=150, style=default_style)
         self.start_screen_alignment.add(start_button_1)
-        #start_button_2 = StartButton(text="Two Players", width=150, style=default_style)
-        #self.start_screen_alignment.add(start_button_2)
+        # start_button_2 = StartButton(text="Two Players", width=150, style=default_style)
+        # self.start_screen_alignment.add(start_button_2)
         end_button = EndButton(text="end screen", width=150, style=default_style)
         self.start_screen_alignment.add(end_button)
 
@@ -99,11 +104,11 @@ class StartScreen(arcade.View):
                 child=self.start_screen_alignment)
         )
 
-
     def on_draw(self):
         self.clear()
         self.manager.draw()
         self.logo.draw()
+
 
 class MyGame(arcade.View):
     """
@@ -131,7 +136,12 @@ class MyGame(arcade.View):
         self.player_sprite = None
         self.top_label = None
 
+        self.score = 0
         self.level = 1
+
+        self.cooldown_message = None
+        self.cooldown_time = 0
+        self.cooldown = False
 
         self.wave = 0
 
@@ -167,8 +177,12 @@ class MyGame(arcade.View):
         # set up player health
         self.bar_list = arcade.SpriteList()
         self.top_label: arcade.Text = arcade.Text(
-            f'LEVEL: {0}\t  HEALTH: \t                   SCORE: 0', 10, SCREEN_HEIGHT-20, arcade.color.GREEN, 11,
+            f'LEVEL: {0}\t  HEALTH: \t                   SCORE: {self.score}', 10, SCREEN_HEIGHT-20, arcade.color.GREEN, 11,
             width=(SCREEN_WIDTH - 20), align="left", font_name="Kenney Rocket Square"
+        )
+        self.cooldown_message: arcade.Text = arcade.Text(
+            f'COOLDOWN', 10, SCREEN_HEIGHT/2, arcade.color.GREEN, 11,
+            width=(SCREEN_WIDTH - 20), align="center", font_name="Kenney Rocket Square"
         )
 
         # Set up the player
@@ -196,8 +210,6 @@ class MyGame(arcade.View):
 
         arcade.set_background_color(arcade.color.BLACK)
 
-        pass
-
     def on_draw(self):
         """
         Render the screen.
@@ -222,7 +234,23 @@ class MyGame(arcade.View):
 
         # draw the player health bar and top label text
         self.bar_list.draw()
+        self.top_label: arcade.Text = arcade.Text(
+            f'LEVEL: {0}\t  HEALTH: \t                   SCORE: {self.score}', 10, SCREEN_HEIGHT - 20,
+            arcade.color.GREEN, 11,
+            width=(SCREEN_WIDTH - 20), align="left", font_name="Kenney Rocket Square"
+        )
         self.top_label.draw()
+
+        # if we have been hit and are in cooldown mode, draw message
+        if self.cooldown_time > 0:
+            self.cooldown_message: arcade.Text = arcade.Text(
+                text=f'COOLDOWN: {self.cooldown_time: .0f}',
+                start_x=self.player_sprite.center_x-50,
+                start_y=self.player_sprite.center_y+50,
+                font_size=10,
+                color=arcade.color.GREEN,
+                font_name="Kenney Rocket Square")
+            self.cooldown_message.draw()
 
     def on_update(self, delta_time):
         """
@@ -247,42 +275,50 @@ class MyGame(arcade.View):
         self.player_bullet_list.update()
         self.player_list.update()
 
-        # Check Collisions
-        for bullet in self.enemy_bullet_list:
-            # Bullet contact with player sprite
-            hits = arcade.check_for_collision_with_list(bullet, self.player_list)
-
-            if len(hits) > 0:
-                bullet.remove_from_sprite_lists()
-
-                # Player hurt and has damage done
-                self.player_sprite.health -= bullet.damage
-                # reset indicator bar fullness
-                self.player_sprite.indicator_bar.fullness = (
-                    self.player_sprite.health / 5
-                )
-
-            # Bullet is off the below screen
-            if bullet.bottom < 0:
-                bullet.remove_from_sprite_lists()
-
-
-        for bullet in self.player_bullet_list:
-            # Bullet contact with enemy sprite
-            for enemy_row in self.enemy_list:
-                hits = arcade.check_for_collision_with_list(bullet, enemy_row)
+        if self.cooldown_time <= 0:
+            # Check Collisions
+            for bullet in self.enemy_bullet_list:
+                # Bullet contact with player sprite
+                hits = arcade.check_for_collision_with_list(bullet, self.player_list)
 
                 if len(hits) > 0:
+                    # if player hit, enter cooldown
+                    self.cooldown = True
+                    self.cooldown_time = COOLDOWN_DEFAULT
                     bullet.remove_from_sprite_lists()
-                    for enemy_hit in hits:
-                        enemy_hit.hp -= bullet.damage
-                        if enemy_hit.hp <= 0:
-                            enemy_hit.remove_from_sprite_lists()
-                            # Explosion here
 
-            # Bullet is above the screen
-            if bullet.bottom > SCREEN_HEIGHT:
-                bullet.remove_from_sprite_lists()
+                    # Player hurt and has damage done
+                    self.player_sprite.health -= bullet.damage
+                    # reset indicator bar fullness
+                    self.player_sprite.indicator_bar.fullness = (
+                        self.player_sprite.health / 5
+                    )
+
+                # Bullet is off the below screen
+                if bullet.bottom < 0:
+                    bullet.remove_from_sprite_lists()
+
+            for bullet in self.player_bullet_list:
+                # Bullet contact with enemy sprite
+                for enemy_row in self.enemy_list:
+                    hits = arcade.check_for_collision_with_list(bullet, enemy_row)
+
+                    if len(hits) > 0:
+                        bullet.remove_from_sprite_lists()
+                        # if enemy hit, increase score
+                        self.score += bullet.damage
+                        for enemy_hit in hits:
+                            enemy_hit.hp -= bullet.damage
+                            if enemy_hit.hp <= 0:
+                                enemy_hit.remove_from_sprite_lists()
+                                # Explosion here
+
+                # Bullet is above the screen
+                if bullet.bottom > SCREEN_HEIGHT:
+                    bullet.remove_from_sprite_lists()
+        else:
+            # decrease cooldown time
+            self.cooldown_time -= delta_time
 
         # Move Enemy Ships
         for enemy_row in self.enemy_list:
@@ -319,7 +355,7 @@ class MyGame(arcade.View):
 
                 self.enemy_list.append(enemy_row)
 
-            if self.time > 10 and self.wave==1:
+            if self.time > 10 and self.wave == 1:
                 self.wave += 1
 
                 # Spawn a middle row of 8 level 1 regular ships from right side
@@ -628,6 +664,7 @@ class MyGame(arcade.View):
             self.player_sprite.update_player_speed()
         pass
 
+
 class ReturnStartButton(arcade.gui.UIFlatButton):
     """ Return to start screen"""
 
@@ -635,6 +672,7 @@ class ReturnStartButton(arcade.gui.UIFlatButton):
         start_view = StartScreen()
         start_view.setup()
         start_view.window.show_view(start_view)
+
 
 class EndScreen(arcade.View):
 
@@ -689,6 +727,7 @@ class EndScreen(arcade.View):
         start_y = (SCREEN_HEIGHT / 2) + 30
         arcade.draw_text("SCORE:", start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
         self.logo.draw()
+
 
 def main():
     """ Main function """
