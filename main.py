@@ -61,6 +61,76 @@ class StartButton(arcade.gui.UIFlatButton):
         game_view.setup()
         game_view.window.show_view(game_view)
 
+class HighScoreButton(arcade.gui.UIFlatButton):
+
+    def on_click(self, event: arcade.gui.UIOnClickEvent):
+        game_view = HighScore(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
+        game_view.setup()
+        game_view.window.show_view(game_view)
+
+
+#High score screen view
+class HighScore(arcade.View):
+    def __init__(self, width, height, title):
+        super().__init__()
+    def setup(self):
+        self.logo = arcade.Sprite("Galaga.png", .15)
+        self.logo.center_x = SCREEN_WIDTH/2
+        self.logo.center_y = SCREEN_HEIGHT - 200
+    def on_draw(self):
+        self.clear()
+        self.logo.draw()
+        self.manager.draw()
+
+        arcade.draw_text("High Scores",
+                         SCREEN_WIDTH / 2,
+                         SCREEN_HEIGHT / 2 + 30,
+                         (43, 80, 227),
+                         font_size=20,
+                         anchor_x="center",
+                         font_name="Kenney Rocket Square")
+
+    def on_show_view(self):
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+        self.button = arcade.gui.UIBoxLayout(space_between=20)
+
+        #style for button
+        default_style = {
+            "font_name": ("Kenney Rocket Square"),
+            "font_size": 10,
+            "font_color": arcade.color.WHITE,
+            "font_color_pressed": arcade.color.WHITE,
+            "border_width": 5,
+            "border_color": None,
+            "bg_color": (43, 80, 227),
+            "bg_color_pressed": (173, 27, 10),
+            "bg_color_hover": (43, 80, 227),
+            "border_color_hover": (173, 27, 10),
+            "border_color_pressed": (173, 27, 10),
+        }
+
+        #button for returning to main menu
+        main_menu = arcade.gui.UIFlatButton(text="Main Menu", width=200, height=80, style=default_style)
+        @main_menu.event("on_click")
+        def on_click_settings(event):
+            game = StartScreen()
+            game.setup()
+            game.window.show_view(game)
+
+        self.button.add(main_menu)
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="center_x",
+                anchor_y="center_y",
+                # change the align_y number to change where the button is on the screen
+                align_y=-100,
+                child=self.button)
+        )
+
+
+
+
 
 
 class StartScreen(arcade.View):
@@ -78,8 +148,8 @@ class StartScreen(arcade.View):
         self.start_screen_alignment = arcade.gui.UIBoxLayout(space_between=20)
 
         default_style = {
-            "font_name": ("calibri", "arial"),
-            "font_size": 15,
+            "font_name": ("Kenney Rocket Square"),
+            "font_size": 10,
             "font_color": arcade.color.WHITE,
             "font_color_pressed": arcade.color.WHITE,
             "border_width": 5,
@@ -88,12 +158,12 @@ class StartScreen(arcade.View):
             "bg_color_pressed": (173, 27, 10),
             "bg_color_hover": (43, 80, 227),
             "border_color_hover": (173, 27, 10),
-            "border_color_pressed": (173, 27, 10)
+            "border_color_pressed": (173, 27, 10),
         }
 
-        start_button_1 = StartButton(text="One Player", width=150, style=default_style)
+        start_button_1 = StartButton(text="Play", width=150, style=default_style)
         self.start_screen_alignment.add(start_button_1)
-        start_button_2 = StartButton(text="Two Players", width=150, style=default_style)
+        start_button_2 = HighScoreButton(text="High Scores", width=150, style=default_style)
         self.start_screen_alignment.add(start_button_2)
 
         self.manager.add(
@@ -166,6 +236,8 @@ class MyGame(arcade.View):
         # Loads a file and creates a shader from it
         # window_size = self.get_size()
         # self.shadertoy = Shadertoy.create_from_file(window_size, "Purple.glsl")
+
+
 
     def setup(self):
         """ Set up the game variables. Call to re-start the game. """
@@ -309,6 +381,9 @@ class MyGame(arcade.View):
         # self.shadertoy.render()
         # self.shadertoy.render()
 
+        #for pause button
+        self.manager.draw()
+
     def on_update(self, delta_time):
         """
         All the logic to move, and the game logic goes here.
@@ -408,6 +483,108 @@ class MyGame(arcade.View):
             self.player_sprite.right_pressed = False
             self.player_sprite.update_player_speed()
         pass
+
+    def on_show_view(self):
+        #For pause button
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+        self.pause_button_alignment = arcade.gui.UIBoxLayout(space_between=20)
+
+
+        #Pause button styling
+        default_style = {
+            "font_name": ("calibri", "arial"),
+            "font_size": 15,
+            "font_color": (54, 161, 42),
+            "border_width": 5,
+            "border_color": (54, 161, 42),
+            "bg_color": (0, 0, 0),
+            "bg_color_hover": (43, 80, 227),
+            "border_color_hover": arcade.color.WHITE
+        }
+
+        pause_button = arcade.gui.UIFlatButton(text="||", width=40, height=60, style=default_style)
+
+        #event to pause game on click of button
+        @pause_button.event("on_click")
+        def on_click_settings(event):
+            pause = PauseView(self)
+            self.window.show_view(pause)
+
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x = 'right',
+                align_x = 0,
+                anchor_y = 'top',
+                align_y = 0,
+                child=self.pause_button_alignment)
+        )
+        self.pause_button_alignment.add(pause_button)
+
+class PauseView(arcade.View):
+    def __init__(self, game_view):
+        super().__init__()
+        self.game_view = game_view
+
+    def on_show_view(self):
+        #manager for buttons
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+        self.buttons = arcade.gui.UIBoxLayout(space_between=20)
+
+        #style for buttons
+        default_style = {
+            "font_name": ("Kenney Rocket Square"),
+            "font_size": 10,
+            "font_color": arcade.color.WHITE,
+            "font_color_pressed": arcade.color.WHITE,
+            "border_width": 5,
+            "border_color": None,
+            "bg_color": (43, 80, 227),
+            "bg_color_pressed": (173, 27, 10),
+            "bg_color_hover": (43, 80, 227),
+            "border_color_hover": (173, 27, 10),
+            "border_color_pressed": (173, 27, 10),
+        }
+
+        # button for resuming
+        resume = arcade.gui.UIFlatButton(text="Resume Game", width=200, height=50, style=default_style)
+        @resume.event("on_click")
+        def on_click_settings(event):
+            self.window.show_view(self.game_view)
+        self.buttons.add(resume)
+
+        # button for restarting
+        start_button = StartButton(text="Restart", width=200, height=50, style=default_style)
+        self.buttons.add(start_button)
+
+        #button for returning to main menu
+        main_menu = arcade.gui.UIFlatButton(text="Main Menu", width=200, height=50, style=default_style)
+        @main_menu.event("on_click")
+        def on_click_settings(event):
+            game = StartScreen()
+            game.setup()
+            game.window.show_view(game)
+        self.buttons.add(main_menu)
+
+
+
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="center_x",
+                anchor_y="center_y",
+                child=self.buttons)
+        )
+    def on_draw(self):
+        self.clear()
+        self.manager.draw()
+        arcade.draw_text("PAUSED",
+                         SCREEN_WIDTH / 2,
+                         SCREEN_HEIGHT / 2 + 200,
+                         (43, 80, 227),
+                         font_size=40,
+                         anchor_x="center",
+                         font_name="Kenney Rocket Square")
 
 
 def main():
