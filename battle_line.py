@@ -1,5 +1,6 @@
 import arcade
 import enemy
+import math
 
 SCREEN_WIDTH = 500
 
@@ -18,8 +19,6 @@ class Horizontal_Battle_Line(arcade.SpriteList):
         self.change_x = speed
         self.moving_forward = False
 
-
-
         # Fill the position tracker with False to imply no ships have been added
         # Each position should be a tuple: ((x_loc,y_loc), boolean is_filled)
         line_width = right_pos - left_pos
@@ -34,7 +33,6 @@ class Horizontal_Battle_Line(arcade.SpriteList):
         super().append(enemy)
         enemy.battle_line_destination = self.positions[position][0]
         enemy.position_in_battle_line = position
-
 
     def update(self, delta_time: float = 1 / 60):
         # Update the positions of each enemy inside the formation
@@ -108,3 +106,13 @@ def parabolic_destination(entrance_loc, turn_point, num_points, break_point):
             destinations.append((x, y))
 
     return destinations
+
+def circle_trajectory(radius, center, start_theta, num_points, break_theta):
+
+    theta_index = start_theta
+    delta_theta = (break_theta-start_theta) / num_points
+    trajectory = []
+    while theta_index < break_theta:
+        trajectory.append((radius * math.cos(theta_index) + center[0], radius*math.sin(theta_index) + center[1]))
+        theta_index += delta_theta
+    return trajectory
