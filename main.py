@@ -972,7 +972,7 @@ class MyGame(arcade.View):
                 trajectory_omega.extend(trajectory_b_2)
 
                 # Ok now we create a WHOLE lot of bugs to travel 4 different paths
-                for i in range(150):
+                for i in range(100):
                     if i % 4 == 0:
                         swarm = create_swarmer(trajectory_alpha)
                     elif i % 4 == 1:
@@ -982,7 +982,7 @@ class MyGame(arcade.View):
                     elif i % 4 == 3:
                         swarm = create_swarmer(trajectory_omega)
 
-                    swarm.center_x, swarm.center_y = SCREEN_WIDTH + 40 * (i + 1), SCREEN_HEIGHT
+                    swarm.center_x, swarm.center_y = SCREEN_WIDTH + 80 * (i + 1), SCREEN_HEIGHT
                     enemy_row.append(swarm)
 
                 self.enemy_list.append(enemy_row)
