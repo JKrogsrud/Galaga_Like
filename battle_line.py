@@ -5,7 +5,18 @@ import math
 SCREEN_WIDTH = 500
 
 
-# This class represents a moving formation that moves side to side
+"""
+A Horizontal battle line is a child class of a spriteList that specializes in also keeping enemies
+evenly spaced and oscilalting right and left
+
+:param left_pos: The x-coord of how far to the left the line moves
+:param right_pos the x-coord of how far to the right the line moves
+:param speed: the speed at which the line oscilates back and forth
+:param add_rate currently unused param that dictates how quivkly the battle_line can fill up
+:param num_ships The capacity of ships for the battle line
+:param depth: the y-coord of the battle_line
+
+"""
 class Horizontal_Battle_Line(arcade.SpriteList):
     def __init__(self, left_pos, right_pos, speed=10, add_rate=1, num_ships=6, depth=100):
         super().__init__()
@@ -68,10 +79,10 @@ class Horizontal_Battle_Line(arcade.SpriteList):
 Create a list of destination points for enemies to use for traversal
 These curves are a series of destinations and the ships may or may not follow
 them exactly. It's more of a quick fix to get some curved trajectories
--entrance_loc is where (off_screen) the ships will begin
--turn_point is the location of the vertex of the parabola
--num_points is how many sub-destinations will be created for the destination list
--break_point is an x-value that determines the end of the list (when the ship should join a formation)
+:param entrance_loc is where (off_screen) the ships will begin
+:param turn_point is the location of the vertex of the parabola
+:param num_points is how many sub-destinations will be created for the destination list
+:param break_point is an x-value that determines the end of the list (when the ship should join a formation)
 """
 def parabolic_destination(entrance_loc, turn_point, num_points, break_point):
     if entrance_loc[0] == turn_point[0]:
@@ -107,6 +118,17 @@ def parabolic_destination(entrance_loc, turn_point, num_points, break_point):
 
     return destinations
 
+"""
+A circle trajectory is used for the creation of trajectories that are circles or partial circles
+:param radius: the radius of the circle
+:param center: the center of the circle
+:param start_theta: the angle in radians as wheere the trajectory starts on the circle
+:param num_points:  how many destination points to use in creating the circle
+    too large a value here will make enemies vibrate searching for their destination
+    too small a value has the enemies cutting corners and making this trajectory a regular polygon
+    must be fine-tuned for desired effect
+:param break_theta: the the angle in radians at which the enemies stop circling in this trajectory
+"""
 def circle_trajectory(radius, center, start_theta, num_points, break_theta):
 
     theta_index = start_theta

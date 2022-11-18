@@ -1,12 +1,3 @@
-"""
-Starting Template
-
-Once you have learned how to use classes, you can begin your program with this
-template.
-
-If Python and Arcade are installed, this example can be run from the command line with:
-python -m arcade.examples.starting_template
-"""
 import arcade
 from bullet import Bullet
 from weapon import Weapon
@@ -125,9 +116,6 @@ class HighScore(arcade.View):
         )
 
 
-
-
-
 class EndButton(arcade.gui.UIFlatButton):
 
     def on_click(self, event: arcade.gui.UIOnClickEvent):
@@ -211,7 +199,7 @@ class MyGame(arcade.View):
         self.player_sprite = None
         self.top_label = None
 
-        self.level = 2
+        self.level = 1
 
         self.score = 0
 
@@ -713,6 +701,18 @@ class MyGame(arcade.View):
                 self.enemy_list.append(enemy_row_2)
                 self.enemy_list.append(enemy_row_3)
 
+            if self.time > 29:
+                enemies_left = 0
+                for enemy_row in self.enemy_list:
+                    enemies_left += len(enemy_row);
+                if enemies_left == 0:
+                    print("Entering Level 2")
+                    self.level = 2
+                    # Reset the time and wave
+                    self.time = 0
+                    self.wave = 0
+
+
 
         if self.level == 2:
             # Bullet Hell Level
@@ -972,14 +972,14 @@ class MyGame(arcade.View):
                 trajectory_omega.extend(trajectory_b_2)
 
                 # Ok now we create a WHOLE lot of bugs to travel 4 different paths
-                for i in range(200):
-                    if i%4 == 0:
+                for i in range(150):
+                    if i % 4 == 0:
                         swarm = create_swarmer(trajectory_alpha)
-                    elif i%4 == 1:
+                    elif i % 4 == 1:
                         swarm = create_swarmer(trajectory_beta)
-                    elif i%4 == 2:
+                    elif i % 4 == 2:
                         swarm = create_swarmer(trajectory_gamma)
-                    elif i%4 == 3:
+                    elif i % 4 == 3:
                         swarm = create_swarmer(trajectory_omega)
 
                     swarm.center_x, swarm.center_y = SCREEN_WIDTH + 40 * (i + 1), SCREEN_HEIGHT
@@ -987,7 +987,7 @@ class MyGame(arcade.View):
 
                 self.enemy_list.append(enemy_row)
 
-            if self.time > 55 and self.wave == 8:
+            if self.time > 60 and self.wave == 8:
                 self.wave += 1
                 """
                 BOSS TIME
@@ -1011,6 +1011,13 @@ class MyGame(arcade.View):
                 self.enemy_list.append(boss_line)
                 print("Boss joined the party")
 
+            if self.time > 65:
+                enemies_left = 0
+                for enemy_row in self.enemy_list:
+                    enemies_left += len(enemy_row)
+                if enemies_left == 0:
+                    # Go to End Screen and check if a high score is achieved
+                    pass
 
         # Check if enemies are ready to fire
         for enemy_row in self.enemy_list:

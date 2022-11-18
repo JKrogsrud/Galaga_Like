@@ -10,7 +10,19 @@ SCREEN_HEIGHT = 700
 ENEMY_SPRITE_SCALING = .0375
 PLAYER_SPRITE_SCALING = .25
 
-
+"""
+Extension of sprite class to represent some of the enmies used in the game
+:param filename: name of the .png file used for the sprite
+:param destination_list a list of (x,y) coordinates
+:param position_in_battle_line: when added to a battle line this is it's relative position to the other enemies
+:param scale: the scaling of the .png file to fit the game
+:param hp: an integer representing how many shots it takes to destroy the enemy
+:param time_between_firing: time in seconds between when the enemy fires
+:param speed-to_formation: the speed of the enemy as it moves to it's battle_line formation
+:param speed_in_formation: the speed at which the enemy travels while oscilating back and forth in a battle_line
+:param time_until_charge: how many seconds until the enemy leaves the battle_line position and charges the player
+:param despawn_time: how much time in seconds it takes the enemy to despawn and remove itself from any sprite lists
+"""
 class Enemy(arcade.Sprite):
     def __init__(self,
                  filename,
@@ -160,6 +172,8 @@ Singleton enemies are used when you want to specify exactly where an enemy path 
 without relying on any battle_lines.
 
 Always put the charging destination at a negative y value so that the sprite despawns
+
+:param similar to enemy parameters
 """
 class Singleton(arcade.Sprite):
     def __init__(self,
@@ -340,6 +354,7 @@ class Swarmer(arcade.Sprite):
 A Firing Pattern is used by a Battle_Line to control when a formation can shoot
 It dictates whether the enemies are in open fire (fire according to their fire rate) or if they are
 to fire a specific pattern.
+:param timing_list a list of integers which dictates the delay between shots
 """
 class FiringPattern:
     def __init__(self, timing_list):
@@ -359,6 +374,10 @@ class FiringPattern:
     def set_position(self, index):
         self.firing_index = index
 
+
+"""
+ENEMY CREATION FUNCTIONS
+"""
 def create_random_level_one_bug(destination_list):
     goo_shot = Bullet(filename="goo_shot_1.png",
                       speed=10)
@@ -369,7 +388,7 @@ def create_random_level_one_bug(destination_list):
                   speed_to_formation=5,
                   destination_list=destination_list,
                   time_between_firing=(random.random() % 4) + 4,
-                  time_until_charge=(random.random() % 20) + 10)
+                  time_until_charge=(random.random() % 20) + 10,)
     return copy.deepcopy(enemy)
 
 
