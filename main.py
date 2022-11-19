@@ -73,6 +73,16 @@ class HighScore(arcade.View):
         self.logo = arcade.Sprite("Galaga.png", .15)
         self.logo.center_x = SCREEN_WIDTH/2
         self.logo.center_y = SCREEN_HEIGHT - 200
+
+        try:
+            with open('high_scores.txt', 'r') as f:
+                line = f.readline()
+                user = line.split(",")[0]
+                score = line.split(",")[1]
+
+                self.highscore_dict[user] = score
+        except FileNotFoundError:
+            print("File does not exist")
     def on_draw(self):
         self.clear()
         self.logo.draw()
@@ -87,6 +97,8 @@ class HighScore(arcade.View):
                          font_name="Kenney Rocket Square")
 
     def on_show_view(self):
+        """ Shows the highscores"""
+
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
         self.button = arcade.gui.UIBoxLayout(space_between=20)
@@ -123,9 +135,6 @@ class HighScore(arcade.View):
                 align_y=-100,
                 child=self.button)
         )
-
-
-
 
 
 class EndButton(arcade.gui.UIFlatButton):
@@ -182,32 +191,6 @@ class StartScreen(arcade.View):
         self.clear()
         self.manager.draw()
         self.logo.draw()
-
-class HighScore(arcade.View):
-    highscore_dict = {}
-    """This function will display the top 10. scores of the game"""
-    def setup(self):
-        try:
-
-            with open('high_scores.txt', 'r') as f:
-                line = f.readline()
-                user = line.split(",")[0]
-                score = line.split(",")[1]
-
-                self.highscore_dict[user] = score
-        except FileNotFoundError:
-            print("File does not exist")
-
-    def on_show_view(self):
-        """Sets up the Highscore screen"""
-        start_x = SCREEN_WIDTH / 2
-        start_y = SCREEN_HEIGHT - 200
-        arcade.draw_text("GAME OVER", start_x, start_y, arcade.color.FRENCH_WINE, 50, align="center")
-
-        for i in self.highscore_dict:
-            print(i)
-
-
 
 class MyGame(arcade.View):
     """
@@ -370,6 +353,10 @@ class MyGame(arcade.View):
         if self.player_sprite.health <= 0:
             arcade.exit()
 
+            game_view = EndScreen(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
+            game_view.setup()
+            game_view.window.show_view(game_view)
+
         # Animate all the stars falling
         for star in self.background_list:
             star.y -= star.speed * delta_time
@@ -405,9 +392,9 @@ class MyGame(arcade.View):
                     self.player_sprite.health / 5
                 )
 
-            # Bullet is off the below screen
-            if bullet.top < 0:
-                bullet.remove_from_sprite_lists()
+                # Bullet is off the below screen
+                if bullet.top < 0:
+                    bullet.remove_from_sprite_lists()
 
             for bullet in self.player_bullet_list:
                 # Bullet contact with enemy sprite
