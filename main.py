@@ -27,7 +27,7 @@ COOLDOWN_DEFAULT = 3
 INDICATOR_BAR_OFFSET = 32
 
 # For testing and not dying
-DEBUG = False
+DEBUG = True
 
 class Star:
     def __init__(self):
