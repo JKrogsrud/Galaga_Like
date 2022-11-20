@@ -104,9 +104,9 @@ class IndicatorBar:
 
         # Set the fullness and position of the bar
         self.fullness: float = 1.0
-        self._center_x, self._center_y = (280, 665)
-        self.background_box.position = (280, 665)
-        self.full_box.position = (280, 665)
+        self._center_x, self._center_y = (270, 665)
+        self.background_box.position = (270, 665)
+        self.full_box.position = (270, 665)
 
         # Make sure full_box is to the left of the bar instead of the middle
         self.full_box.left = self._center_x - (self._box_width // 2)
