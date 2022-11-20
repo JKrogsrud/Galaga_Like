@@ -1,12 +1,3 @@
-"""
-Starting Template
-
-Once you have learned how to use classes, you can begin your program with this
-template.
-
-If Python and Arcade are installed, this example can be run from the command line with:
-python -m arcade.examples.starting_template
-"""
 import arcade
 from bullet import Bullet
 from weapon import Weapon
@@ -36,7 +27,7 @@ COOLDOWN_DEFAULT = 3
 INDICATOR_BAR_OFFSET = 32
 
 # For testing and not dying
-DEBUG = True
+DEBUG = False
 
 
 class Star:
@@ -217,7 +208,8 @@ class MyGame(arcade.View):
         self.player_sprite = None
         self.top_label = None
 
-        self.level = 2
+        self.level = 1
+
         self.score = 0
         self.wave = 0
         self.time = 0
@@ -360,19 +352,20 @@ class MyGame(arcade.View):
                     self.cooldown_time = COOLDOWN_DEFAULT
                     bullet.remove_from_sprite_lists()
 
-                # Player hurt and has damage done
-                # TODO: Remove Debug mode
-                if not DEBUG:
-                    self.player_sprite.health -= bullet.damage
+                    # Player hurt and has damage done
+                    # TODO: Remove Debug mode
+                    if not DEBUG:
+                        self.player_sprite.health -= bullet.damage
                 # reset indicator bar fullness
                 # TODO: Some jankiness causing crashes here
                 self.player_sprite.indicator_bar.fullness = (
                     self.player_sprite.health / 5
                 )
 
-                # Bullet is off the below screen
-                if bullet.top < 0:
-                    bullet.remove_from_sprite_lists()
+            for bullet in self.player_bullet_list:
+                # Bullet contact with enemy sprite
+                for enemy_row in self.enemy_list:
+                    hits = arcade.check_for_collision_with_list(bullet, enemy_row)
 
                 for bullet in self.player_bullet_list:
                     # Bullet contact with enemy sprite
@@ -392,6 +385,18 @@ class MyGame(arcade.View):
                     # Bullet is above the screen
                     if bullet.bottom > SCREEN_HEIGHT:
                         bullet.remove_from_sprite_lists()
+                        # if enemy hit, increase score
+                        self.score += bullet.damage
+                        for enemy_hit in hits:
+                            enemy_hit.hp -= bullet.damage
+                            if enemy_hit.hp <= 0:
+                                enemy_hit.remove_from_sprite_lists()
+                                # Explosion here
+
+                # Bullet is off the below screen
+                if bullet.top < 0:
+                    bullet.remove_from_sprite_lists()
+
         else:
             # decrease cooldown time
             self.cooldown_time -= delta_time
@@ -708,6 +713,19 @@ class MyGame(arcade.View):
                 self.enemy_list.append(enemy_row_2)
                 self.enemy_list.append(enemy_row_3)
 
+            if self.time > 29:
+                enemies_left = 0
+                for enemy_row in self.enemy_list:
+                    enemies_left += len(enemy_row);
+                if enemies_left == 0:
+                    print("Entering Level 2")
+                    self.level = 2
+                    # Reset the time and wave
+                    self.time = 0
+                    self.wave = 0
+
+
+
         if self.level == 2:
             # Bullet Hell Level
             if self.time > 0 and self.wave == 0:
@@ -969,7 +987,7 @@ class MyGame(arcade.View):
                 trajectory_omega.extend(trajectory_b_2)
 
                 # Ok now we create a WHOLE lot of bugs to travel 4 different paths
-                for i in range(200):
+                for i in range(100):
                     if i % 4 == 0:
                         swarm = create_swarmer(trajectory_alpha)
                     elif i % 4 == 1:
@@ -979,12 +997,12 @@ class MyGame(arcade.View):
                     elif i % 4 == 3:
                         swarm = create_swarmer(trajectory_omega)
 
-                    swarm.center_x, swarm.center_y = SCREEN_WIDTH + 40 * (i + 1), SCREEN_HEIGHT
+                    swarm.center_x, swarm.center_y = SCREEN_WIDTH + 80 * (i + 1), SCREEN_HEIGHT
                     enemy_row.append(swarm)
 
                 self.enemy_list.append(enemy_row)
 
-            if self.time > 55 and self.wave == 8:
+            if self.time > 60 and self.wave == 8:
                 self.wave += 1
                 """
                 BOSS TIME
@@ -1007,6 +1025,14 @@ class MyGame(arcade.View):
                 boss_line.add_enemy(0, boss)
                 self.enemy_list.append(boss_line)
                 print("Boss joined the party")
+
+            if self.time > 65:
+                enemies_left = 0
+                for enemy_row in self.enemy_list:
+                    enemies_left += len(enemy_row)
+                if enemies_left == 0:
+                    #Go to End Screen and check if a high score is achieved
+                    pass
 
         # Check if enemies are ready to fire
         for enemy_row in self.enemy_list:
