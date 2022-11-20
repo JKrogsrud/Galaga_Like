@@ -27,7 +27,7 @@ COOLDOWN_DEFAULT = 3
 INDICATOR_BAR_OFFSET = 32
 
 # For testing and not dying
-DEBUG = True
+DEBUG = False
 
 class Star:
     def __init__(self):
@@ -300,7 +300,7 @@ class MyGame(arcade.View):
         # draw the player health bar and top label text
         self.bar_list.draw()
         self.top_label: arcade.Text = arcade.Text(
-            f'LEVEL: {0}\t  HEALTH: \t                   SCORE: {self.score}', 10, SCREEN_HEIGHT - 20,
+            f'LEVEL: {self.level}\t  HEALTH: \t                   SCORE: {self.score}', 10, SCREEN_HEIGHT - 20,
             arcade.color.GREEN, 11,
             width=(SCREEN_WIDTH - 20), align="left", font_name="Kenney Rocket Square"
         )
@@ -356,10 +356,10 @@ class MyGame(arcade.View):
                     self.cooldown_time = COOLDOWN_DEFAULT
                     bullet.remove_from_sprite_lists()
 
-                # Player hurt and has damage done
-                # TODO: Remove Debug mode
-                if not DEBUG:
-                    self.player_sprite.health -= bullet.damage
+                    # Player hurt and has damage done
+                    # TODO: Remove Debug mode
+                    if not DEBUG:
+                        self.player_sprite.health -= bullet.damage
                 # reset indicator bar fullness
                 # TODO: Some jankiness causing crashes here
                 self.player_sprite.indicator_bar.fullness = (
@@ -1016,7 +1016,7 @@ class MyGame(arcade.View):
                 for enemy_row in self.enemy_list:
                     enemies_left += len(enemy_row)
                 if enemies_left == 0:
-                    # Go to End Screen and check if a high score is achieved
+                    #Go to End Screen and check if a high score is achieved
                     pass
 
         # Check if enemies are ready to fire
