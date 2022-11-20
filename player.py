@@ -2,17 +2,15 @@ import arcade
 from typing import Tuple
 
 from weapon import Weapon
-from bullet import Bullet
 
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 700
 
 
-
 class Player(arcade.Sprite):
     def __init__(self, bar_list: arcade.SpriteList,
                  filename="Player.png",
-                 health=5,
+                 health=10,
                  weapon=Weapon(),
                  movement_speed=10,
                  ):
@@ -55,10 +53,9 @@ class Player(arcade.Sprite):
 class IndicatorBar:
     """
        Represents a bar which can display information about a sprite.
-
        :param Player owner: The owner of this indicator bar.
        :param arcade.SpriteList sprite_list: The sprite list used to draw the indicator
-       bar components.
+        bar components.
        :param Tuple[float, float] position: The initial position of the bar.
        :param arcade.Color full_color: The color of the bar.
        :param arcade.Color background_color: The background color of the bar.
@@ -105,9 +102,9 @@ class IndicatorBar:
 
         # Set the fullness and position of the bar
         self.fullness: float = 1.0
-        self._center_x, self._center_y = (270, 665)
-        self.background_box.position = (270, 665)
-        self.full_box.position = (270, 665)
+        self._center_x, self._center_y = (275, 665)
+        self.background_box.position = (275, 665)
+        self.full_box.position = (275, 665)
 
         # Make sure full_box is to the left of the bar instead of the middle
         self.full_box.left = self._center_x - (self._box_width // 2)
@@ -154,4 +151,3 @@ class IndicatorBar:
     def position(self) -> Tuple[float, float]:
         """Returns the current position of the bar."""
         return self._center_x, self._center_y
-
