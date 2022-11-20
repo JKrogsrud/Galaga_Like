@@ -97,8 +97,6 @@ class HighScore(arcade.View):
                          font_name="Kenney Rocket Square")
 
     def on_show_view(self):
-        """ Shows the highscores"""
-
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
         self.button = arcade.gui.UIBoxLayout(space_between=20)
@@ -135,6 +133,9 @@ class HighScore(arcade.View):
                 align_y=-100,
                 child=self.button)
         )
+
+
+
 
 
 class EndButton(arcade.gui.UIFlatButton):
@@ -191,6 +192,7 @@ class StartScreen(arcade.View):
         self.clear()
         self.manager.draw()
         self.logo.draw()
+
 
 class MyGame(arcade.View):
     """
@@ -392,10 +394,6 @@ class MyGame(arcade.View):
                     self.player_sprite.health / 5
                 )
 
-                # Bullet is off the below screen
-                if bullet.top < 0:
-                    bullet.remove_from_sprite_lists()
-
             for bullet in self.player_bullet_list:
                 # Bullet contact with enemy sprite
                 for enemy_row in self.enemy_list:
@@ -411,9 +409,10 @@ class MyGame(arcade.View):
                                 enemy_hit.remove_from_sprite_lists()
                                 # Explosion here
 
-                # Bullet is above the screen
-                if bullet.bottom > SCREEN_HEIGHT:
+                # Bullet is off the below screen
+                if bullet.top < 0:
                     bullet.remove_from_sprite_lists()
+
         else:
             # decrease cooldown time
             self.cooldown_time -= delta_time
