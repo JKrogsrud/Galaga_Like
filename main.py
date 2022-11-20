@@ -2,13 +2,13 @@ import arcade
 from bullet import Bullet
 from weapon import Weapon
 from player import Player
-from enemy import Enemy, create_random_level_one_bug, create_random_level_two_bug, create_random_level_three_bug, create_L4_bug
+from enemy import Enemy, create_random_level_one_bug, create_random_level_two_bug, \
+    create_random_level_three_bug, create_L4_bug
 from enemy import FiringPattern, create_swarmer, create_singleton
 from battle_line import Horizontal_Battle_Line, parabolic_destination, circle_trajectory
 import random
 import math
 import copy
-from arcade.experimental import Shadertoy
 import arcade.gui
 
 FULL_SCREEN_HEIGHT = 700
@@ -29,7 +29,11 @@ INDICATOR_BAR_OFFSET = 32
 # For testing and not dying
 DEBUG = False
 
+
 class Star:
+    """
+    Star class for background animation on game screen
+    """
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -38,6 +42,7 @@ class Star:
         # Reset flake to random position above screen
         self.y = random.randrange(SCREEN_HEIGHT, SCREEN_HEIGHT + 100)
         self.x = random.randrange(SCREEN_WIDTH)
+
 
 class StartButton(arcade.gui.UIFlatButton):
     """
@@ -48,22 +53,29 @@ class StartButton(arcade.gui.UIFlatButton):
         game_view.setup()
         game_view.window.show_view(game_view)
 
-class HighScoreButton(arcade.gui.UIFlatButton):
 
+class HighScoreButton(arcade.gui.UIFlatButton):
+    """
+    HighScoreButton class for start screen
+    """
     def on_click(self, event: arcade.gui.UIOnClickEvent):
         game_view = HighScore(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
         game_view.setup()
         game_view.window.show_view(game_view)
 
 
-#High score screen view
 class HighScore(arcade.View):
+    """
+    HighScore View class
+    """
     def __init__(self, width, height, title):
         super().__init__()
+
     def setup(self):
         self.logo = arcade.Sprite("Galaga.png", .15)
         self.logo.center_x = SCREEN_WIDTH/2
         self.logo.center_y = SCREEN_HEIGHT - 200
+
     def on_draw(self):
         self.clear()
         self.logo.draw()
@@ -82,9 +94,9 @@ class HighScore(arcade.View):
         self.manager.enable()
         self.button = arcade.gui.UIBoxLayout(space_between=20)
 
-        #style for button
+        # style for button
         default_style = {
-            "font_name": ("Kenney Rocket Square"),
+            "font_name": "Kenney Rocket Square",
             "font_size": 10,
             "font_color": arcade.color.WHITE,
             "font_color_pressed": arcade.color.WHITE,
@@ -97,8 +109,9 @@ class HighScore(arcade.View):
             "border_color_pressed": (173, 27, 10),
         }
 
-        #button for returning to main menu
+        # button for returning to main menu
         main_menu = arcade.gui.UIFlatButton(text="Main Menu", width=200, height=80, style=default_style)
+
         @main_menu.event("on_click")
         def on_click_settings(event):
             game = StartScreen()
@@ -117,28 +130,32 @@ class HighScore(arcade.View):
 
 
 class EndButton(arcade.gui.UIFlatButton):
-
+    """
+    EndButton class
+    """
     def on_click(self, event: arcade.gui.UIOnClickEvent):
         game_view = EndScreen()
         game_view.setup()
         game_view.window.show_view(game_view)
 
-class StartScreen(arcade.View):
 
+class StartScreen(arcade.View):
+    """
+    StartScreen View class
+    """
     def setup(self):
         self.logo = arcade.Sprite("Galaga.png", .15)
         self.logo.center_x = SCREEN_WIDTH/2
         self.logo.center_y = SCREEN_HEIGHT - 200
 
     def on_show_view(self):
-        # SET UP START SCREEN
-
+        # Set up start screen
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
         self.start_screen_alignment = arcade.gui.UIBoxLayout(space_between=20)
 
         default_style = {
-            "font_name": ("Kenney Rocket Square"),
+            "font_name": "Kenney Rocket Square",
             "font_size": 10,
             "font_color": arcade.color.WHITE,
             "font_color_pressed": arcade.color.WHITE,
@@ -163,7 +180,6 @@ class StartScreen(arcade.View):
                 child=self.start_screen_alignment)
         )
 
-
     def on_draw(self):
         self.clear()
         self.manager.draw()
@@ -172,19 +188,12 @@ class StartScreen(arcade.View):
 
 class MyGame(arcade.View):
     """
-    Main application class.
-
-    NOTE: Go ahead and delete the methods you don't need.
-    If you do need a method, delete the 'pass' and replace it
-    with your own code. Don't leave 'pass' in this program.
+    Main application class for playing Galaga
     """
-
     def __init__(self, width, height, title):
         super().__init__()
 
-        # If you have sprite lists, you should create them here,
-        # and set them to None
-
+        # create sprites
         self.enemy_list = []
         self.enemy_bullet_list = None
         self.player_list = None
@@ -202,9 +211,7 @@ class MyGame(arcade.View):
         self.level = 1
 
         self.score = 0
-
         self.wave = 0
-
         self.time = 0
 
         self.cooldown_message = None
@@ -218,7 +225,6 @@ class MyGame(arcade.View):
 
         for i in range(50):
             star = Star()
-
             # Randomly position it
             star.x = random.randrange(SCREEN_WIDTH)
             star.y = random.randrange(SCREEN_HEIGHT)
@@ -232,22 +238,13 @@ class MyGame(arcade.View):
 
         arcade.set_background_color(arcade.color.BLACK)
 
-        # Create your sprites and sprite lists here
-
+        # Create sprites and sprite lists here
         self.enemy_bullet_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.player_bullet_list = arcade.SpriteList()
 
         # set up player health
         self.bar_list = arcade.SpriteList()
-        self.top_label: arcade.Text = arcade.Text(
-            f'LEVEL: {self.level}\t  HEALTH: \t                   SCORE: 0', 10, SCREEN_HEIGHT-20, arcade.color.GREEN, 11,
-            width=(SCREEN_WIDTH - 20), align="left", font_name="Kenney Rocket Square"
-        )
-        self.cooldown_message: arcade.Text = arcade.Text(
-            f'COOLDOWN', 10, SCREEN_HEIGHT/2, arcade.color.GREEN, 11,
-            width=(SCREEN_WIDTH - 20), align="center", font_name="Kenney Rocket Square"
-        )
 
         # Set up the player
         self.player_sprite = Player(self.bar_list)
@@ -279,18 +276,13 @@ class MyGame(arcade.View):
         """
         Render the screen.
         """
-
-        # This command should happen before we start drawing. It will clear
-        # the screen to the background color, and erase what we drew last frame.
-
+        # clear the screen to the background color, and erase what we drew last frame.
         self.clear()
-
-        # GAME PLAY DISPLAY
 
         for star in self.background_list:
             arcade.draw_circle_filled(star.x, star.y, star.size, arcade.color.YELLOW_ORANGE)
 
-        # Call draw() on all your sprite lists below
+        # Call draw() on all sprite lists below
         for enemy_row in self.enemy_list:
             enemy_row.draw()
         self.enemy_bullet_list.draw()
@@ -300,9 +292,14 @@ class MyGame(arcade.View):
         # draw the player health bar and top label text
         self.bar_list.draw()
         self.top_label: arcade.Text = arcade.Text(
-            f'LEVEL: {self.level}\t  HEALTH: \t                   SCORE: {self.score}', 10, SCREEN_HEIGHT - 20,
-            arcade.color.GREEN, 11,
-            width=(SCREEN_WIDTH - 20), align="left", font_name="Kenney Rocket Square"
+            text=f'LEVEL: {0}\t\t\tHEALTH: \t                   SCORE: {self.score}',
+            start_y=SCREEN_HEIGHT - 20,
+            color=arcade.color.GREEN,
+            font_size=11,
+            width=(SCREEN_WIDTH - 20),
+            start_x=0,
+            align="left",
+            font_name="Kenney Rocket Square"
         )
         self.top_label.draw()
 
@@ -317,17 +314,16 @@ class MyGame(arcade.View):
                 font_name="Kenney Rocket Square")
             self.cooldown_message.draw()
 
-        #for pause button
+        # for pause button
         self.manager.draw()
 
     def on_update(self, delta_time):
         """
         All the logic to move, and the game logic goes here.
-        Normally, you'll call update() on the sprite lists that
-        need it.
+        Call update() on the sprite lists that need it.
         """
         # check to see if the sprite is dead -> then exit the game
-        #TODO: Change this to go to GAME OVER
+        # TODO: Change this to go to GAME OVER
         if self.player_sprite.health <= 0:
             arcade.exit()
 
@@ -371,7 +367,23 @@ class MyGame(arcade.View):
                 for enemy_row in self.enemy_list:
                     hits = arcade.check_for_collision_with_list(bullet, enemy_row)
 
-                    if len(hits) > 0:
+                for bullet in self.player_bullet_list:
+                    # Bullet contact with enemy sprite
+                    for enemy_row in self.enemy_list:
+                        hits = arcade.check_for_collision_with_list(bullet, enemy_row)
+
+                        if len(hits) > 0:
+                            bullet.remove_from_sprite_lists()
+                            # if enemy hit, increase score
+                            self.score += bullet.damage
+                            for enemy_hit in hits:
+                                enemy_hit.hp -= bullet.damage
+                                if enemy_hit.hp <= 0:
+                                    enemy_hit.remove_from_sprite_lists()
+                                    # Explosion here
+
+                    # Bullet is above the screen
+                    if bullet.bottom > SCREEN_HEIGHT:
                         bullet.remove_from_sprite_lists()
                         # if enemy hit, increase score
                         self.score += bullet.damage
@@ -678,7 +690,7 @@ class MyGame(arcade.View):
                     enemy = create_random_level_one_bug(trajectory_front)
                     enemy.center_x, enemy.center_y = SCREEN_WIDTH + 40 + 40*i, 400
                     enemy.angle = 180
-                    enemy_row_2.add_enemy(i,enemy)
+                    enemy_row_2.add_enemy(i, enemy)
 
                 # Battle_formation 3
 
@@ -750,8 +762,10 @@ class MyGame(arcade.View):
 
             if self.time > 15 and self.wave == 1:
                 self.wave += 1
-                trajectory_1 = circle_trajectory(radius=300, center=(400, 100), start_theta=math.pi/4, num_points=30, break_theta = 5*math.pi/4)
-                trajectory_2 = circle_trajectory(radius=300, center=(100, 100), start_theta=7*math.pi/4, num_points=30, break_theta = 11*math.pi/4)
+                trajectory_1 = circle_trajectory(radius=300, center=(400, 100), start_theta=math.pi/4, num_points=30,
+                                                 break_theta=5*math.pi/4)
+                trajectory_2 = circle_trajectory(radius=300, center=(100, 100), start_theta=7*math.pi/4, num_points=30,
+                                                 break_theta=11*math.pi/4)
 
                 trajectory_1.extend(trajectory_2)
 
@@ -799,10 +813,10 @@ class MyGame(arcade.View):
                 enemy_1.angle = 180
 
                 trajectory_right = [(SCREEN_WIDTH - 150, SCREEN_HEIGHT+10),
-                                   (SCREEN_WIDTH - 150, 3*SCREEN_HEIGHT/4),
-                                   (SCREEN_WIDTH - 110, 3*SCREEN_HEIGHT/4 - 40),
-                                   (SCREEN_WIDTH - 150, 3*SCREEN_HEIGHT/4 - 80),
-                                   (SCREEN_WIDTH - 190, 3*SCREEN_HEIGHT / 4 - 120)]
+                                    (SCREEN_WIDTH - 150, 3*SCREEN_HEIGHT/4),
+                                    (SCREEN_WIDTH - 110, 3*SCREEN_HEIGHT/4 - 40),
+                                    (SCREEN_WIDTH - 150, 3*SCREEN_HEIGHT/4 - 80),
+                                    (SCREEN_WIDTH - 190, 3*SCREEN_HEIGHT / 4 - 120)]
 
                 destination_right = (SCREEN_WIDTH - 40, -100)
                 firing_pattern_1 = FiringPattern([1.2, 0.2, 0.2, 0.2, 0.2, 0.2])
@@ -935,7 +949,8 @@ class MyGame(arcade.View):
                 trajectory_1 = circle_trajectory(75, (SCREEN_WIDTH-100, SCREEN_HEIGHT-100), math.pi/2, 50, 9*math.pi/2)
                 trajectory_2 = circle_trajectory(330, (400, 325), 2*math.pi/3, 60, math.pi)
                 trajectory_3 = circle_trajectory(50, (70, 275), math.pi/2, 100, 7*math.pi/2)
-                trajectory_4 = circle_trajectory(70, (SCREEN_WIDTH-150, SCREEN_HEIGHT-450), 3*math.pi/2, 50, 9* math.pi/2)
+                trajectory_4 = circle_trajectory(70, (SCREEN_WIDTH-150, SCREEN_HEIGHT-450),
+                                                 3*math.pi/2, 50, 9 * math.pi/2)
                 trajectory_4.reverse()
 
                 trajectory_1.extend(trajectory_2)
@@ -1067,13 +1082,12 @@ class MyGame(arcade.View):
         pass
 
     def on_show_view(self):
-        #For pause button
+        # For pause button
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
         self.pause_button_alignment = arcade.gui.UIBoxLayout(space_between=20)
 
-
-        #Pause button styling
+        # Pause button styling
         default_style = {
             "font_name": ("calibri", "arial"),
             "font_size": 15,
@@ -1087,7 +1101,7 @@ class MyGame(arcade.View):
 
         pause_button = arcade.gui.UIFlatButton(text="||", width=40, height=60, style=default_style)
 
-        #event to pause game on click of button
+        # event to pause game on click of button
         @pause_button.event("on_click")
         def on_click_settings(event):
             pause = PauseView(self)
@@ -1095,13 +1109,14 @@ class MyGame(arcade.View):
 
         self.manager.add(
             arcade.gui.UIAnchorWidget(
-                anchor_x = 'right',
-                align_x = 0,
-                anchor_y = 'top',
-                align_y = 0,
+                anchor_x='right',
+                align_x=0,
+                anchor_y='top',
+                align_y=0,
                 child=self.pause_button_alignment)
         )
         self.pause_button_alignment.add(pause_button)
+
 
 class PauseView(arcade.View):
     def __init__(self, game_view):
@@ -1109,14 +1124,14 @@ class PauseView(arcade.View):
         self.game_view = game_view
 
     def on_show_view(self):
-        #manager for buttons
+        # manager for buttons
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
         self.buttons = arcade.gui.UIBoxLayout(space_between=20)
 
-        #style for buttons
+        # style for buttons
         default_style = {
-            "font_name": ("Kenney Rocket Square"),
+            "font_name": "Kenney Rocket Square",
             "font_size": 10,
             "font_color": arcade.color.WHITE,
             "font_color_pressed": arcade.color.WHITE,
@@ -1131,6 +1146,7 @@ class PauseView(arcade.View):
 
         # button for resuming
         resume = arcade.gui.UIFlatButton(text="Resume Game", width=200, height=50, style=default_style)
+
         @resume.event("on_click")
         def on_click_settings(event):
             self.window.show_view(self.game_view)
@@ -1140,8 +1156,9 @@ class PauseView(arcade.View):
         start_button = StartButton(text="Restart", width=200, height=50, style=default_style)
         self.buttons.add(start_button)
 
-        #button for returning to main menu
+        # button for returning to main menu
         main_menu = arcade.gui.UIFlatButton(text="Main Menu", width=200, height=50, style=default_style)
+
         @main_menu.event("on_click")
         def on_click_settings(event):
             game = StartScreen()
@@ -1149,14 +1166,13 @@ class PauseView(arcade.View):
             game.window.show_view(game)
         self.buttons.add(main_menu)
 
-
-
         self.manager.add(
             arcade.gui.UIAnchorWidget(
                 anchor_x="center_x",
                 anchor_y="center_y",
                 child=self.buttons)
         )
+
     def on_draw(self):
         self.clear()
         self.manager.draw()
