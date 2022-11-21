@@ -24,11 +24,16 @@ ENEMY_SPRITE_SCALING = .0375
 PLAYER_SPRITE_SCALING = .02
 SCREEN_TITLE = "Galaga"
 COOLDOWN_DEFAULT = 3
-
 INDICATOR_BAR_OFFSET = 32
 
+GREEN = arcade.color.LIME_GREEN
+PINK = arcade.color.BARBIE_PINK
+BLUE = arcade.color.CAPRI
+RED = arcade.color.FERRARI_RED
+WHITE = arcade.color.WHITE
+BLACK = arcade.color.BLACK
+
 highscore = []
-high_score = []
 defaultUsername = "AAA"
 
 # For testing and not dying
@@ -55,16 +60,6 @@ class StartButton(arcade.gui.UIFlatButton):
     """
     def on_click(self, event: arcade.gui.UIOnClickEvent):
         game_view = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
-        game_view.setup()
-        game_view.window.show_view(game_view)
-
-
-class EndButton(arcade.gui.UIFlatButton):
-    """
-    EndButton = class for button to go to end screen
-    """
-    def on_click(self, event: arcade.gui.UIOnClickEvent):
-        game_view = EndScreen()
         game_view.setup()
         game_view.window.show_view(game_view)
 
@@ -208,11 +203,11 @@ class EndScreen(arcade.View):
     def setup(self):
         # function to sort scores
         def sort_scores(s):
-            return s[0]
+            return s[1]
 
         self.logo = arcade.Sprite("Galaga.png", .15)
         self.logo.center_x = SCREEN_WIDTH/2
-        self.logo.center_y = SCREEN_HEIGHT - 100
+        self.logo.center_y = SCREEN_HEIGHT - 150
 
         highscore.clear()
 
@@ -225,13 +220,19 @@ class EndScreen(arcade.View):
                 user = line.split(",")[0]
                 users_score = line.split(",")[1]
 
-                highscore.append((user, users_score))
+                highscore.append((user, int(users_score)))
             file.close()
         except FileNotFoundError:
             print("File does not exist")
 
         highscore.append((defaultUsername, self.score))
-        highscore.sort(key=sort_scores)
+        highscore.sort(reverse=True, key=sort_scores)
+        print(highscore)
+
+        file = open("high_scores.txt", 'w')
+        for l in range(len(highscore)):
+            file.write(highscore[l][0] + "," + str(highscore[l][1]) + '\n')
+        file.close()
 
     def on_show_view(self):
         # sets up the end screen
@@ -240,8 +241,8 @@ class EndScreen(arcade.View):
         self.end_screen_alignment = arcade.gui.UIBoxLayout(space_between=20)
 
         default_style = {
-            "font_name": ("calibri", "arial"),
-            "font_size": 15,
+            "font_name": "Kenney Rocket Square",
+            "font_size": 10,
             "font_color": arcade.color.WHITE,
             "font_color_pressed": arcade.color.WHITE,
             "border_width": 5,
@@ -250,19 +251,19 @@ class EndScreen(arcade.View):
             "bg_color_pressed": (173, 27, 10),
             "bg_color_hover": (43, 80, 227),
             "border_color_hover": (173, 27, 10),
-            "border_color_pressed": (173, 27, 10)
+            "border_color_pressed": (173, 27, 10),
         }
 
-        return_button = ReturnStartButton(text="Return to Start", width=150, style=default_style)
+        return_button = ReturnStartButton(text="Return to Start", width=200, style=default_style)
         self.end_screen_alignment.add(return_button)
-        replay_button = StartButton(text="Play Again", width=150, style=default_style)
+        replay_button = StartButton(text="Play Again", width=200, style=default_style)
         self.end_screen_alignment.add(replay_button)
 
         self.manager.add(
             arcade.gui.UIAnchorWidget(
                 anchor_x="center_x",
                 anchor_y="center_y",
-                align_y=-250,
+                align_y=-225,
                 child=self.end_screen_alignment)
         )
 
@@ -272,16 +273,21 @@ class EndScreen(arcade.View):
 
         # draws GAME OVER text
         start_x = 0
-        start_y = (SCREEN_HEIGHT / 2) + 50
-        arcade.draw_text("GAME OVER", start_x, start_y, arcade.color.LIGHT_BLUE, 20, width=SCREEN_WIDTH, align="center")
+        start_y = (SCREEN_HEIGHT / 2) + 85
+        arcade.draw_text(text="GAME OVER",
+                         start_x=start_x, start_y=start_y,
+                         color=arcade.color.DARK_ORCHID,
+                         font_size=20,
+                         font_name="Kenney Rocket Square",
+                         width=SCREEN_WIDTH, align="center")
 
-        start_x -= 50
-        start_y = (SCREEN_HEIGHT / 2) + 30
-        arcade.draw_text("SCORE:", start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
-
-        start_x += 50
-        arcade.draw_text(self.score, start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
-
+        start_y -= 30
+        arcade.draw_text(text=f'YOUR SCORE: {self.score}',
+                         start_x=start_x, start_y=start_y,
+                         color=arcade.color.DARK_ORCHID,
+                         font_size=15,
+                         font_name="Kenney Rocket Square",
+                         width=SCREEN_WIDTH, align="center")
         self.logo.draw()
 
         #for i in range(len(highscore)):
@@ -289,21 +295,39 @@ class EndScreen(arcade.View):
           #      highscore.insert(i, (defaultUsername, str(self.score) + "\n"))
            #     highscore.pop()
 
-        file = open("high_scores.txt", 'w')
-        for l in range(len(highscore)):
-            file.write(highscore[l][0] + "," + str(highscore[l][1]))
-        file.close()
+        #start_x += 80
+        start_y -= 50
+        arcade.draw_text(text=f'HIGH SCORES',
+                         start_x=start_x, start_y=start_y,
+                         color=arcade.color.BARBIE_PINK,
+                         font_size=15,
+                         font_name="Kenney Rocket Square",
+                         width=SCREEN_WIDTH, align="center")
 
-        start_x += 80
-        for i in range(len(highscore)):
-            start_y -= 25
-            arcade.draw_text(highscore[i][1], start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
-
-        start_x -= 40
-        start_y += 125
-        for i in range(len(highscore)):
-            start_y -= 25
-            arcade.draw_text(highscore[i][0], start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
+        start_x = (SCREEN_WIDTH / 2) - 80
+        if len(highscore) < 5:
+            for i in range(len(highscore)):
+                start_y -= 25
+                arcade.draw_text(text=f'{highscore[i][0]} ------- {highscore[i][1]}',
+                                 start_x=start_x, start_y=start_y,
+                                 color=arcade.color.BARBIE_PINK,
+                                 font_size=10,
+                                 font_name="Kenney Rocket Square",
+                                 width=SCREEN_WIDTH, align="left")
+        else:
+            for i in range(5):
+                start_y -= 25
+                arcade.draw_text(text=f'{highscore[i][0]} ------- {highscore[i][1]}',
+                                 start_x=start_x, start_y=start_y,
+                                 color=arcade.color.BARBIE_PINK,
+                                 font_size=10,
+                                 font_name="Kenney Rocket Square",
+                                 width=SCREEN_WIDTH, align="left")
+        #start_x -= 40
+        #start_y += 125
+       # for i in range(len(highscore)):
+          #  start_y -= 25
+           # arcade.draw_text(highscore[i][0], start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
 
 
 class MyGame(arcade.View):
@@ -467,7 +491,8 @@ class MyGame(arcade.View):
                     # player hurt and has damage done
                     self.player_sprite.health -= bullet.damage
                     # reset indicator bar fullness
-                    self.player_sprite.indicator_bar.fullness = (self.player_sprite.health / 10)
+                    # todo
+                    self.player_sprite.indicator_bar.fullness = (self.player_sprite.health / 3)
                 # bullet is off the below screen
                 if bullet.top < 0:
                     bullet.remove_from_sprite_lists()
@@ -482,7 +507,8 @@ class MyGame(arcade.View):
                         enemy.remove_from_sprite_lists()
                         self.player_sprite.health -= 1
                         # reset indicator bar fullness
-                        self.player_sprite.indicator_bar.fullness = (self.player_sprite.health / 10)
+                        # todo
+                        self.player_sprite.indicator_bar.fullness = (self.player_sprite.health / 3)
         else:
             # decrease cooldown time
             self.cooldown_time -= delta_time
@@ -502,6 +528,7 @@ class MyGame(arcade.View):
                     # if enemy hit, increase score
                     self.score += bullet.damage
                     for enemy_hit in hits:
+                        # TODO: fix
                         enemy_hit.hp -= bullet.damage
                         if enemy_hit.hp <= 0:
                             enemy_hit.remove_from_sprite_lists()

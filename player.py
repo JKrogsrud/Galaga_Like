@@ -9,7 +9,7 @@ SCREEN_HEIGHT = 700
 class Player(arcade.Sprite):
     def __init__(self, bar_list: arcade.SpriteList,
                  filename="Player.png",
-                 health=10,
+                 health=3,
                  weapon=Weapon(),
                  movement_speed=10,
                  ):
