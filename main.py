@@ -5,7 +5,7 @@ from player import Player
 from enemy import Enemy, create_random_level_one_bug, create_random_level_two_bug, \
     create_random_level_three_bug, create_L4_bug
 from enemy import FiringPattern, create_swarmer, create_singleton
-from battle_line import Horizontal_Battle_Line, parabolic_destination, circle_trajectory
+from battle_line import HorizontalBattleLine, parabolic_destination, circle_trajectory
 import random
 import math
 import copy
@@ -28,15 +28,14 @@ INDICATOR_BAR_OFFSET = 32
 
 GREEN = arcade.color.LIME_GREEN
 PINK = arcade.color.BARBIE_PINK
-BLUE = arcade.color.CAPRI
-RED = arcade.color.FERRARI_RED
-WHITE = arcade.color.WHITE
-BLACK = arcade.color.BLACK
+BLUE = arcade.color.AZURE
+RED = (255, 39, 0)
+ORANGE = arcade.color.YELLOW_ORANGE
 
 highscore = []
 defaultUsername = "AAA"
 
-# For testing and not dying
+# for testing and not dying
 DEBUG = False
 
 
@@ -56,7 +55,8 @@ class Star:
 
 class StartButton(arcade.gui.UIFlatButton):
     """
-    StartButton = class for button to begin game from the starting screen
+    StartButton = class for button to start/restart the game
+    -> on the start view, paused view, and end view
     """
     def on_click(self, event: arcade.gui.UIOnClickEvent):
         game_view = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, "Galaga")
@@ -64,14 +64,13 @@ class StartButton(arcade.gui.UIFlatButton):
         game_view.window.show_view(game_view)
 
 
-class ReturnStartButton(arcade.gui.UIFlatButton):
+class ExitButton(arcade.gui.UIFlatButton):
     """
-    ReturnStartButton = class for returning to start screen from ending or paused
+    ExitButton = exits the game
+    -> on the end view and paused view
     """
     def on_click(self, event: arcade.gui.UIOnClickEvent):
-        start_view = StartScreen()
-        start_view.setup()
-        start_view.window.show_view(start_view)
+        arcade.exit()
 
 
 class StartScreen(arcade.View):
@@ -91,20 +90,23 @@ class StartScreen(arcade.View):
 
         default_style = {
             "font_name": "Kenney Rocket Square",
-            "font_size": 10,
+            "font_size": 12,
             "font_color": arcade.color.WHITE,
             "font_color_pressed": arcade.color.WHITE,
             "border_width": 5,
             "border_color": None,
-            "bg_color": (43, 80, 227),
-            "bg_color_pressed": (173, 27, 10),
-            "bg_color_hover": (43, 80, 227),
-            "border_color_hover": (173, 27, 10),
-            "border_color_pressed": (173, 27, 10),
+            "bg_color": BLUE,
+            "bg_color_pressed": RED,
+            "bg_color_hover": BLUE,
+            "border_color_hover": RED,
+            "border_color_pressed": RED,
         }
 
-        start_button_1 = StartButton(text="Play", width=150, style=default_style)
-        self.start_screen_alignment.add(start_button_1)
+        # add the buttons for start screen
+        start_button = StartButton(text="Play", width=200, style=default_style)
+        self.start_screen_alignment.add(start_button)
+        exit_button = ExitButton(text="Exit", width=200, style=default_style)
+        self.start_screen_alignment.add(exit_button)
 
         self.manager.add(
             arcade.gui.UIAnchorWidget(
@@ -139,16 +141,16 @@ class PauseView(arcade.View):
         # style for buttons
         default_style = {
             "font_name": "Kenney Rocket Square",
-            "font_size": 10,
+            "font_size": 12,
             "font_color": arcade.color.WHITE,
             "font_color_pressed": arcade.color.WHITE,
             "border_width": 5,
             "border_color": None,
-            "bg_color": (43, 80, 227),
-            "bg_color_pressed": (173, 27, 10),
-            "bg_color_hover": (43, 80, 227),
-            "border_color_hover": (173, 27, 10),
-            "border_color_pressed": (173, 27, 10),
+            "bg_color": BLUE,
+            "bg_color_pressed": RED,
+            "bg_color_hover": BLUE,
+            "border_color_hover": RED,
+            "border_color_pressed": RED,
         }
 
         # button for resuming
@@ -163,15 +165,13 @@ class PauseView(arcade.View):
         start_button = StartButton(text="Restart", width=200, height=50, style=default_style)
         self.buttons.add(start_button)
 
-        # button for returning to main menu
-        main_menu = arcade.gui.UIFlatButton(text="Main Menu", width=200, height=50, style=default_style)
+        # button for exiting the game
+        exit_button = arcade.gui.UIFlatButton(text="Exit", width=200, height=50, style=default_style)
 
-        @main_menu.event("on_click")
+        @exit_button.event("on_click")
         def on_click_settings(event):
-            game = StartScreen()
-            game.setup()
-            game.window.show_view(game)
-        self.buttons.add(main_menu)
+            arcade.exit()
+        self.buttons.add(exit_button)
 
         self.manager.add(
             arcade.gui.UIAnchorWidget(
@@ -186,7 +186,7 @@ class PauseView(arcade.View):
         arcade.draw_text("PAUSED",
                          SCREEN_WIDTH / 2,
                          SCREEN_HEIGHT / 2 + 200,
-                         (43, 80, 227),
+                         PINK,
                          font_size=40,
                          anchor_x="center",
                          font_name="Kenney Rocket Square")
@@ -199,12 +199,10 @@ class EndScreen(arcade.View):
     def __init__(self, score):
         super().__init__()
         self.score = score
+        self.new_high_score = False
+        self.your_score = (defaultUsername, self.score)
 
     def setup(self):
-        # function to sort scores
-        def sort_scores(s):
-            return s[1]
-
         self.logo = arcade.Sprite("Galaga.png", .15)
         self.logo.center_x = SCREEN_WIDTH/2
         self.logo.center_y = SCREEN_HEIGHT - 150
@@ -215,119 +213,128 @@ class EndScreen(arcade.View):
         try:
             file = open('high_scores.txt', 'r')
             lines = file.readlines()
-
             for line in lines:
                 user = line.split(",")[0]
                 users_score = line.split(",")[1]
-
                 highscore.append((user, int(users_score)))
             file.close()
         except FileNotFoundError:
             print("File does not exist")
 
-        highscore.append((defaultUsername, self.score))
-        highscore.sort(reverse=True, key=sort_scores)
-        print(highscore)
+        # function to sort scores
+        def sort_scores(s):
+            return s[1]
 
-        file = open("high_scores.txt", 'w')
-        for l in range(len(highscore)):
-            file.write(highscore[l][0] + "," + str(highscore[l][1]) + '\n')
-        file.close()
+        # add all the high scores to a list of tuples and sort by score
+        highscore.append(self.your_score)
+        highscore.sort(reverse=True, key=sort_scores)
+
+        # mark whether or not your score made it in the top 5
+        if highscore.index(self.your_score) < 5:
+            self.new_high_score = True
+
+        # write the sorted scores back to the file
+        try:
+            file = open("high_scores.txt", 'w')
+            for l in range(len(highscore)):
+                file.write(highscore[l][0] + "," + str(highscore[l][1]) + '\n')
+            file.close()
+        except FileNotFoundError:
+            print("File does not exist")
 
     def on_show_view(self):
-        # sets up the end screen
+        # sets up end screen buttons
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
         self.end_screen_alignment = arcade.gui.UIBoxLayout(space_between=20)
 
         default_style = {
             "font_name": "Kenney Rocket Square",
-            "font_size": 10,
+            "font_size": 12,
             "font_color": arcade.color.WHITE,
             "font_color_pressed": arcade.color.WHITE,
             "border_width": 5,
             "border_color": None,
-            "bg_color": (43, 80, 227),
-            "bg_color_pressed": (173, 27, 10),
-            "bg_color_hover": (43, 80, 227),
-            "border_color_hover": (173, 27, 10),
-            "border_color_pressed": (173, 27, 10),
+            "bg_color": BLUE,
+            "bg_color_pressed": RED,
+            "bg_color_hover": BLUE,
+            "border_color_hover": RED,
+            "border_color_pressed": RED,
         }
 
-        return_button = ReturnStartButton(text="Return to Start", width=200, style=default_style)
-        self.end_screen_alignment.add(return_button)
+        # add end screen buttons
         replay_button = StartButton(text="Play Again", width=200, style=default_style)
         self.end_screen_alignment.add(replay_button)
+        exit_button = ExitButton(text="Exit", width=200, style=default_style)
+        self.end_screen_alignment.add(exit_button)
 
         self.manager.add(
             arcade.gui.UIAnchorWidget(
                 anchor_x="center_x",
                 anchor_y="center_y",
-                align_y=-225,
+                align_y=-220,
                 child=self.end_screen_alignment)
         )
 
     def on_draw(self):
         self.clear()
         self.manager.draw()
+        self.logo.draw()
 
-        # draws GAME OVER text
+        # draw end screen text (game over, your score, high scores list)
         start_x = 0
         start_y = (SCREEN_HEIGHT / 2) + 85
         arcade.draw_text(text="GAME OVER",
                          start_x=start_x, start_y=start_y,
-                         color=arcade.color.DARK_ORCHID,
-                         font_size=20,
+                         color=BLUE,
+                         font_size=18,
                          font_name="Kenney Rocket Square",
                          width=SCREEN_WIDTH, align="center")
-
         start_y -= 30
         arcade.draw_text(text=f'YOUR SCORE: {self.score}',
                          start_x=start_x, start_y=start_y,
-                         color=arcade.color.DARK_ORCHID,
-                         font_size=15,
+                         color=BLUE,
+                         font_size=13,
                          font_name="Kenney Rocket Square",
                          width=SCREEN_WIDTH, align="center")
-        self.logo.draw()
-
-        #for i in range(len(highscore)):
-         #   if self.score > int(highscore[i][1]) and (defaultUsername, str(self.score) + "\n") not in highscore:
-          #      highscore.insert(i, (defaultUsername, str(self.score) + "\n"))
-           #     highscore.pop()
-
-        #start_x += 80
         start_y -= 50
         arcade.draw_text(text=f'HIGH SCORES',
                          start_x=start_x, start_y=start_y,
-                         color=arcade.color.BARBIE_PINK,
-                         font_size=15,
+                         color=PINK,
+                         font_size=13,
                          font_name="Kenney Rocket Square",
                          width=SCREEN_WIDTH, align="center")
 
-        start_x = (SCREEN_WIDTH / 2) - 80
+        start_x = (SCREEN_WIDTH / 2) - 82
+        score_color = PINK
+        # if there are less than 5 scores in the high score list, display as many as are there...
         if len(highscore) < 5:
             for i in range(len(highscore)):
                 start_y -= 25
+                if self.new_high_score and highscore[i] == self.your_score:
+                    score_color = GREEN
+                else:
+                    score_color = PINK
                 arcade.draw_text(text=f'{highscore[i][0]} ------- {highscore[i][1]}',
                                  start_x=start_x, start_y=start_y,
-                                 color=arcade.color.BARBIE_PINK,
+                                 color=score_color,
                                  font_size=10,
                                  font_name="Kenney Rocket Square",
                                  width=SCREEN_WIDTH, align="left")
+        # ...otherwise display the top 5 scores
         else:
             for i in range(5):
                 start_y -= 25
+                if self.new_high_score and highscore[i] == self.your_score:
+                    score_color = GREEN
+                else:
+                    score_color = PINK
                 arcade.draw_text(text=f'{highscore[i][0]} ------- {highscore[i][1]}',
                                  start_x=start_x, start_y=start_y,
-                                 color=arcade.color.BARBIE_PINK,
+                                 color=score_color,
                                  font_size=10,
                                  font_name="Kenney Rocket Square",
                                  width=SCREEN_WIDTH, align="left")
-        #start_x -= 40
-        #start_y += 125
-       # for i in range(len(highscore)):
-          #  start_y -= 25
-           # arcade.draw_text(highscore[i][0], start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
 
 
 class MyGame(arcade.View):
@@ -347,19 +354,18 @@ class MyGame(arcade.View):
         # for Level 2
         self.enemy_list_2 = None
 
-        # sprites for player health
+        # player health information
         self.bar_list = None
         self.player_sprite = None
         self.top_label = None
+        self.cooldown_message = None
+        self.cooldown_time = 0
 
-        # information about player
+        # player information
         self.level = 1
         self.score = 0
         self.wave = 0
         self.time = 0
-
-        self.cooldown_message = None
-        self.cooldown_time = 0
 
         self.manager = None
         self.pause_button_alignment = None
@@ -409,7 +415,7 @@ class MyGame(arcade.View):
         self.clear()
 
         for star in self.background_list:
-            arcade.draw_circle_filled(star.x, star.y, star.size, arcade.color.YELLOW_ORANGE)
+            arcade.draw_circle_filled(star.x, star.y, star.size, ORANGE)
 
         # call draw() on all sprites
         for enemy_row in self.enemy_list:
@@ -424,7 +430,7 @@ class MyGame(arcade.View):
             text=f' LEVEL: {self.level}   HEALTH:                     SCORE: {self.score}',
             start_y=SCREEN_HEIGHT - 20,
             start_x=0,
-            color=arcade.color.GREEN,
+            color=GREEN,
             font_size=11,
             align="left",
             font_name="Kenney Rocket Square"
@@ -438,14 +444,14 @@ class MyGame(arcade.View):
                 start_x=self.player_sprite.center_x-22,
                 start_y=self.player_sprite.center_y-8,
                 font_size=20,
-                color=arcade.color.GREEN,
+                color=PINK,
                 font_name="Kenney Rocket Square")
             # draw background of force field
             arcade.draw_circle_filled(center_x=self.player_sprite.center_x, center_y=self.player_sprite.center_y,
                                       radius=25, color=(255, 255, 255, 100))
             # draw force field
             arcade.draw_circle_outline(center_x=self.player_sprite.center_x, center_y=self.player_sprite.center_y,
-                                       radius=25, color=arcade.color.GREEN)
+                                       radius=25, color=PINK)
             self.cooldown_message.draw()
 
         # draw the pause button
@@ -453,13 +459,11 @@ class MyGame(arcade.View):
 
     def on_update(self, delta_time):
         """
-        All the logic to move, and the game logic goes here.
+        All the logic to move, and the game logic is here.
         Call update() on the sprite lists that need it.
         """
-        # check to see if the sprite is dead -> then exit the game
+        # check to see if the sprite is dead -> go to end screen
         if self.player_sprite.health <= 0:
-            # arcade.exit()
-
             game_view = EndScreen(self.score)
             game_view.setup()
             game_view.window.show_view(game_view)
@@ -488,11 +492,11 @@ class MyGame(arcade.View):
                     # if player hit, enter cooldown
                     self.cooldown_time = COOLDOWN_DEFAULT
                     bullet.remove_from_sprite_lists()
-                    # player hurt and has damage done
-                    self.player_sprite.health -= bullet.damage
+                    # player hit by bullet and has damage done
+                    if not DEBUG:
+                        self.player_sprite.health -= bullet.damage
                     # reset indicator bar fullness
-                    # todo
-                    self.player_sprite.indicator_bar.fullness = (self.player_sprite.health / 3)
+                    self.player_sprite.indicator_bar.fullness = (self.player_sprite.health / 10)
                 # bullet is off the below screen
                 if bullet.top < 0:
                     bullet.remove_from_sprite_lists()
@@ -505,10 +509,11 @@ class MyGame(arcade.View):
                         # if player hit, enter cooldown
                         self.cooldown_time = COOLDOWN_DEFAULT
                         enemy.remove_from_sprite_lists()
-                        self.player_sprite.health -= 1
+                        # player hit by enemy and has damage done
+                        if not DEBUG:
+                            self.player_sprite.health -= 1
                         # reset indicator bar fullness
-                        # todo
-                        self.player_sprite.indicator_bar.fullness = (self.player_sprite.health / 3)
+                        self.player_sprite.indicator_bar.fullness = (self.player_sprite.health / 10)
         else:
             # decrease cooldown time
             self.cooldown_time -= delta_time
@@ -528,7 +533,6 @@ class MyGame(arcade.View):
                     # if enemy hit, increase score
                     self.score += bullet.damage
                     for enemy_hit in hits:
-                        # TODO: fix
                         enemy_hit.hp -= bullet.damage
                         if enemy_hit.hp <= 0:
                             enemy_hit.remove_from_sprite_lists()
@@ -544,14 +548,13 @@ class MyGame(arcade.View):
         self.time += delta_time
 
         if self.level == 1:
-
             if self.time > 0 and self.wave == 0:
                 self.wave += 1
                 # create a trajectory
                 curve_1 = parabolic_destination((-100, 750), (SCREEN_WIDTH / 2, 250), 30, SCREEN_WIDTH + 100)
 
                 # starting enemies
-                enemy_row = Horizontal_Battle_Line(speed=1,
+                enemy_row = HorizontalBattleLine(speed=1,
                                                    num_ships=10,
                                                    left_pos=120,
                                                    right_pos=480,
@@ -575,7 +578,7 @@ class MyGame(arcade.View):
                                               30,
                                               -100)
                 # battle line
-                enemy_row = Horizontal_Battle_Line(speed=1,
+                enemy_row = HorizontalBattleLine(speed=1,
                                                    num_ships=10,
                                                    left_pos=120,
                                                    right_pos=480,
@@ -609,7 +612,7 @@ class MyGame(arcade.View):
 
             if self.time > 18 and self.wave == 3:
                 self.wave += 1
-                enemy_row = Horizontal_Battle_Line(speed=1,
+                enemy_row = HorizontalBattleLine(speed=1,
                                                    num_ships=8,
                                                    left_pos=120,
                                                    right_pos=480,
@@ -678,7 +681,7 @@ class MyGame(arcade.View):
             if self.time > 20 and self.wave == 4:
                 self.wave += 1
 
-                enemy_row = Horizontal_Battle_Line(speed=1,
+                enemy_row = HorizontalBattleLine(speed=1,
                                                    num_ships=10,
                                                    left_pos=120,
                                                    right_pos=480,
@@ -710,7 +713,7 @@ class MyGame(arcade.View):
 
             if self.time > 22 and self.wave == 5:
                 self.wave += 1
-                enemy_row = Horizontal_Battle_Line(speed=1,
+                enemy_row = HorizontalBattleLine(speed=1,
                                                    num_ships=10,
                                                    left_pos=120,
                                                    right_pos=480,
@@ -747,7 +750,7 @@ class MyGame(arcade.View):
                 # two rows of L1 bugs defend from front
 
                 # big guy line
-                enemy_row_1 = Horizontal_Battle_Line(speed=1,
+                enemy_row_1 = HorizontalBattleLine(speed=1,
                                                      num_ships=8,
                                                      left_pos=120,
                                                      right_pos=480,
@@ -800,7 +803,7 @@ class MyGame(arcade.View):
                 enemy_row_1.add_enemy(4, enemy)
 
                 # battle_formation 2
-                enemy_row_2 = Horizontal_Battle_Line(speed=1,
+                enemy_row_2 = HorizontalBattleLine(speed=1,
                                                      num_ships=10,
                                                      left_pos=120,
                                                      right_pos=480,
@@ -815,7 +818,7 @@ class MyGame(arcade.View):
                     enemy_row_2.add_enemy(i, enemy)
 
                 # battle_formation 3
-                enemy_row_3 = Horizontal_Battle_Line(speed=1,
+                enemy_row_3 = HorizontalBattleLine(speed=1,
                                                      num_ships=10,
                                                      left_pos=120,
                                                      right_pos=480,
@@ -849,7 +852,7 @@ class MyGame(arcade.View):
             if self.time > 0 and self.wave == 0:
                 self.wave += 1
 
-                enemy_row = Horizontal_Battle_Line(20, SCREEN_WIDTH+20, speed=0, num_ships=11, depth=SCREEN_HEIGHT/2)
+                enemy_row = HorizontalBattleLine(20, SCREEN_WIDTH+20, speed=0, num_ships=11, depth=SCREEN_HEIGHT/2)
 
                 pattern_1 = FiringPattern([1, 1, 1, 4, 1, 1, 1, 1, 1])
                 pattern_2 = FiringPattern([1, 1, 1, 1, 2, 1, 1, 1, 1, 1])
@@ -1122,7 +1125,7 @@ class MyGame(arcade.View):
             if self.time > 60 and self.wave == 8:
                 self.wave += 1
                 # BOSS TIME
-                boss_line = Horizontal_Battle_Line(200, 300, 1, num_ships=1, depth=SCREEN_HEIGHT-50)
+                boss_line = HorizontalBattleLine(200, 300, 1, num_ships=1, depth=SCREEN_HEIGHT-50)
                 big_goo = Bullet(filename="blue_laser.png", speed=2, scale=2.5)
                 big_weapon = Weapon(friendly=False, requires_ammo=False, bullet_type=big_goo, bullet_speed=2)
                 destination = [(SCREEN_WIDTH/2, SCREEN_HEIGHT + 100), (SCREEN_WIDTH/2, SCREEN_HEIGHT - 50)]
@@ -1147,7 +1150,9 @@ class MyGame(arcade.View):
                     enemies_left += len(enemy_row)
                 if enemies_left == 0:
                     # go to End Screen and check if a high score is achieved
-                    pass
+                    game_view = EndScreen(self.score)
+                    game_view.setup()
+                    game_view.window.show_view(game_view)
 
         # check if enemies are ready to fire
         for enemy_row in self.enemy_list:
@@ -1161,7 +1166,6 @@ class MyGame(arcade.View):
             for enemy in enemy_row:
                 if enemy.despawn:
                     enemy.remove_from_sprite_lists()
-        pass
 
     def on_key_press(self, key, key_modifiers):
         """
@@ -1177,7 +1181,6 @@ class MyGame(arcade.View):
         elif key == arcade.key.RIGHT:
             self.player_sprite.right_pressed = True
             self.player_sprite.update_player_speed()
-        pass
 
     def on_key_release(self, key, key_modifiers):
         """
@@ -1189,7 +1192,6 @@ class MyGame(arcade.View):
         elif key == arcade.key.RIGHT:
             self.player_sprite.right_pressed = False
             self.player_sprite.update_player_speed()
-        pass
 
     def on_show_view(self):
         # For pause button
@@ -1201,14 +1203,15 @@ class MyGame(arcade.View):
         default_style = {
             "font_name": ("calibri", "arial"),
             "font_size": 18,
-            "font_color": arcade.color.GREEN,
-            "font_color_pressed": arcade.color.GREEN,
+            "font_color": GREEN,
+            "font_color_pressed": GREEN,
+            "font_color_hover": PINK,
             "border_width": 3,
-            "border_color": arcade.color.GREEN,
+            "border_color": GREEN,
             "bg_color": (0, 0, 0),
-            "bg_color_pressed": arcade.color.BARBIE_PINK,
-            "border_color_hover": arcade.color.BARBIE_PINK,
-            "border_color_pressed": arcade.color.BARBIE_PINK,
+            "bg_color_pressed": PINK,
+            "border_color_hover": PINK,
+            "border_color_pressed": PINK,
         }
 
         pause_button = arcade.gui.UIFlatButton(text="||", width=37, height=50, style=default_style)

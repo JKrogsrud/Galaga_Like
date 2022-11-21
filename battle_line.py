@@ -5,7 +5,7 @@ import math
 SCREEN_WIDTH = 500
 
 
-class Horizontal_Battle_Line(arcade.SpriteList):
+class HorizontalBattleLine(arcade.SpriteList):
     """
     A Horizontal battle line is a child class of a spriteList that specializes in also keeping enemies
     evenly spaced and oscillating right and left
