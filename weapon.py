@@ -15,7 +15,7 @@ that will be used in the game.
 """
 
 
-class Weapon():
+class Weapon:
     def __init__(self, image=None,
                  friendly=True,
                  requires_ammo=False,
