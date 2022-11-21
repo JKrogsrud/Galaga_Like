@@ -1006,7 +1006,7 @@ class MyGame(arcade.View):
                              time_until_charge=300
                              )
                 boss.center_x, boss.center_y = SCREEN_WIDTH/2, SCREEN_HEIGHT + 200
-                boss.angle = 180
+                boss.angle = 180 #
                 boss_line.add_enemy(0, boss)
                 self.enemy_list.append(boss_line)
                 print("Boss joined the party")
