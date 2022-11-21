@@ -176,7 +176,7 @@ class Singleton(arcade.Sprite):
 
     Always put the charging destination at a negative y value so that the sprite despawns
 
-    :param similar to enemy parameters
+    params similar to enemy parameters
     """
     def __init__(self,
                  filename,
@@ -375,9 +375,7 @@ class FiringPattern:
         self.firing_index = index
 
 
-"""
-ENEMY CREATION FUNCTIONS
-"""
+"""ENEMY CREATION FUNCTIONS"""
 
 
 def create_random_level_one_bug(destination_list):
@@ -391,7 +389,7 @@ def create_random_level_one_bug(destination_list):
                   speed_to_formation=5,
                   destination_list=destination_list,
                   time_between_firing=(random.random() % 4) + 4,
-                  time_until_charge=(random.random() % 20) + 10,)
+                  time_until_charge=(random.random() % 20) + 10)
     return copy.deepcopy(enemy)
 
 
@@ -431,7 +429,7 @@ def create_L4_bug(destination_list, firing_pattern):
     goo_shot = Bullet(filename="goo_shot_1.png",
                       speed=14)
     enemy_weapon = Weapon(friendly=False, requires_ammo=False, bullet_type=goo_shot, bullet_speed=5)
-    # ENEMY 4 Sprite needed#
+    # ENEMY 4 Sprite needed
     enemy = Enemy(filename="Enemy_3.png",
                   scale=ENEMY_SPRITE_SCALING,
                   weapon=enemy_weapon,

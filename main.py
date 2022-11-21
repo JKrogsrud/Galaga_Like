@@ -435,7 +435,7 @@ class MyGame(arcade.View):
         if self.cooldown_time > 0:
             self.cooldown_message: arcade.Text = arcade.Text(
                 text=f'{ceil(self.cooldown_time): d}',
-                start_x=self.player_sprite.center_x-20,
+                start_x=self.player_sprite.center_x-22,
                 start_y=self.player_sprite.center_y-8,
                 font_size=20,
                 color=arcade.color.GREEN,
@@ -1155,7 +1155,6 @@ class MyGame(arcade.View):
             for enemy in enemy_row:
                 if enemy.despawn:
                     enemy.remove_from_sprite_lists()
-
         pass
 
     def on_key_press(self, key, key_modifiers):
@@ -1172,7 +1171,6 @@ class MyGame(arcade.View):
         elif key == arcade.key.RIGHT:
             self.player_sprite.right_pressed = True
             self.player_sprite.update_player_speed()
-
         pass
 
     def on_key_release(self, key, key_modifiers):
@@ -1198,14 +1196,16 @@ class MyGame(arcade.View):
             "font_name": ("calibri", "arial"),
             "font_size": 18,
             "font_color": arcade.color.GREEN,
+            "font_color_pressed": arcade.color.GREEN,
             "border_width": 3,
             "border_color": arcade.color.GREEN,
             "bg_color": (0, 0, 0),
-            "bg_color_hover": arcade.color.BARBIE_PINK,
+            "bg_color_pressed": arcade.color.BARBIE_PINK,
             "border_color_hover": arcade.color.BARBIE_PINK,
+            "border_color_pressed": arcade.color.BARBIE_PINK,
         }
 
-        pause_button = arcade.gui.UIFlatButton(text="||", width=40, height=50, style=default_style)
+        pause_button = arcade.gui.UIFlatButton(text="||", width=37, height=50, style=default_style)
 
         # event to pause game on click of button
         @pause_button.event("on_click")
