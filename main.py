@@ -10,6 +10,7 @@ import random
 import math
 import copy
 import arcade.gui
+from math import ceil
 
 FULL_SCREEN_HEIGHT = 700
 SCREEN_WIDTH = 500
@@ -23,16 +24,6 @@ ENEMY_SPRITE_SCALING = .0375
 PLAYER_SPRITE_SCALING = .02
 SCREEN_TITLE = "Galaga"
 COOLDOWN_DEFAULT = 3
-STYLING = {
-            "font_name": ("calibri", "arial"),
-            "font_size": 15,
-            "font_color": (54, 161, 42),
-            "border_width": 5,
-            "border_color": (54, 161, 42),
-            "bg_color": (0, 0, 0),
-            "bg_color_hover": (43, 80, 227),
-            "border_color_hover": arcade.color.WHITE
-        }
 
 INDICATOR_BAR_OFFSET = 32
 
@@ -174,7 +165,19 @@ class StartScreen(arcade.View):
         self.manager.enable()
         self.start_screen_alignment = arcade.gui.UIBoxLayout(space_between=20)
 
-        default_style = STYLING
+        default_style = {
+            "font_name": "Kenney Rocket Square",
+            "font_size": 10,
+            "font_color": arcade.color.WHITE,
+            "font_color_pressed": arcade.color.WHITE,
+            "border_width": 5,
+            "border_color": None,
+            "bg_color": (43, 80, 227),
+            "bg_color_pressed": (173, 27, 10),
+            "bg_color_hover": (43, 80, 227),
+            "border_color_hover": (173, 27, 10),
+            "border_color_pressed": (173, 27, 10),
+        }
 
         start_button_1 = StartButton(text="Play", width=150, style=default_style)
         self.start_screen_alignment.add(start_button_1)
@@ -209,7 +212,19 @@ class PauseView(arcade.View):
         self.buttons = arcade.gui.UIBoxLayout(space_between=20)
 
         # style for buttons
-        default_style = STYLING
+        default_style = {
+            "font_name": "Kenney Rocket Square",
+            "font_size": 10,
+            "font_color": arcade.color.WHITE,
+            "font_color_pressed": arcade.color.WHITE,
+            "border_width": 5,
+            "border_color": None,
+            "bg_color": (43, 80, 227),
+            "bg_color_pressed": (173, 27, 10),
+            "bg_color_hover": (43, 80, 227),
+            "border_color_hover": (173, 27, 10),
+            "border_color_pressed": (173, 27, 10),
+        }
 
         # button for resuming game
         resume = arcade.gui.UIFlatButton(text="Resume Game", width=200, height=50, style=default_style)
@@ -273,7 +288,19 @@ class EndScreen(arcade.View):
         self.manager.enable()
         self.end_screen_alignment = arcade.gui.UIBoxLayout(space_between=20)
 
-        default_style = STYLING
+        default_style = {
+            "font_name": "Kenney Rocket Square",
+            "font_size": 10,
+            "font_color": arcade.color.WHITE,
+            "font_color_pressed": arcade.color.WHITE,
+            "border_width": 5,
+            "border_color": None,
+            "bg_color": (43, 80, 227),
+            "bg_color_pressed": (173, 27, 10),
+            "bg_color_hover": (43, 80, 227),
+            "border_color_hover": (173, 27, 10),
+            "border_color_pressed": (173, 27, 10),
+        }
 
         # options on end screen are return to starting menu or play again
         return_button = ReturnStartButton(text="Return to Start", width=150, style=default_style)
@@ -384,7 +411,7 @@ class MyGame(arcade.View):
         for star in self.background_list:
             arcade.draw_circle_filled(star.x, star.y, star.size, arcade.color.YELLOW_ORANGE)
 
-        # call draw() on all sprite lists below
+        # call draw() on all sprites
         for enemy_row in self.enemy_list:
             enemy_row.draw()
         self.enemy_bullet_list.draw()
@@ -396,10 +423,9 @@ class MyGame(arcade.View):
         self.top_label: arcade.Text = arcade.Text(
             text=f' LEVEL: {self.level}   HEALTH:                     SCORE: {self.score}',
             start_y=SCREEN_HEIGHT - 20,
+            start_x=0,
             color=arcade.color.GREEN,
             font_size=11,
-            width=(SCREEN_WIDTH - 20),
-            start_x=0,
             align="left",
             font_name="Kenney Rocket Square"
         )
@@ -408,12 +434,18 @@ class MyGame(arcade.View):
         # if we have been hit and are in cooldown mode, draw this message
         if self.cooldown_time > 0:
             self.cooldown_message: arcade.Text = arcade.Text(
-                text=f'COOLDOWN: {self.cooldown_time: .0f}',
-                start_x=self.player_sprite.center_x-50,
-                start_y=self.player_sprite.center_y+50,
-                font_size=10,
+                text=f'{ceil(self.cooldown_time): d}',
+                start_x=self.player_sprite.center_x-20,
+                start_y=self.player_sprite.center_y-8,
+                font_size=20,
                 color=arcade.color.GREEN,
                 font_name="Kenney Rocket Square")
+            # draw background of force field
+            arcade.draw_circle_filled(center_x=self.player_sprite.center_x, center_y=self.player_sprite.center_y,
+                                      radius=25, color=(255, 255, 255, 100))
+            # draw force field
+            arcade.draw_circle_outline(center_x=self.player_sprite.center_x, center_y=self.player_sprite.center_y,
+                                       radius=25, color=arcade.color.GREEN)
             self.cooldown_message.draw()
 
         # draw the pause button
@@ -425,7 +457,6 @@ class MyGame(arcade.View):
         Call update() on the sprite lists that need it.
         """
         # check to see if the sprite is dead -> then exit the game
-        # TODO: Change this to go to GAME OVER
         if self.player_sprite.health <= 0:
             end = EndScreen()
             self.window.show_view(end)
@@ -445,7 +476,7 @@ class MyGame(arcade.View):
 
         # as long as the player isn't in cooldown mode
         if self.cooldown_time <= 0:
-            # check Collisions
+            # check collisions
             for bullet in self.enemy_bullet_list:
                 # bullet contact with player sprite
                 hits = arcade.check_for_collision_with_list(bullet, self.player_list)
@@ -455,31 +486,11 @@ class MyGame(arcade.View):
                     self.cooldown_time = COOLDOWN_DEFAULT
                     bullet.remove_from_sprite_lists()
                     # player hurt and has damage done
-                    # TODO: Remove Debug mode
-                    if not DEBUG:
-                        self.player_sprite.health -= bullet.damage
+                    self.player_sprite.health -= bullet.damage
                     # reset indicator bar fullness
-                    # TODO: Some jankiness causing crashes here
                     self.player_sprite.indicator_bar.fullness = (self.player_sprite.health / 10)
                 # bullet is off the below screen
                 if bullet.top < 0:
-                    bullet.remove_from_sprite_lists()
-
-            for bullet in self.player_bullet_list:
-                # bullet contact with enemy sprite
-                for enemy_row in self.enemy_list:
-                    hits = arcade.check_for_collision_with_list(bullet, enemy_row)
-
-                    if len(hits) > 0:
-                        bullet.remove_from_sprite_lists()
-                        # if enemy hit, increase score
-                        self.score += bullet.damage
-                        for enemy_hit in hits:
-                            enemy_hit.hp -= bullet.damage
-                            if enemy_hit.hp <= 0:
-                                enemy_hit.remove_from_sprite_lists()
-                # bullet is above the screen
-                if bullet.bottom > SCREEN_HEIGHT:
                     bullet.remove_from_sprite_lists()
 
             # check if any enemies are in contact with the player
@@ -490,10 +501,8 @@ class MyGame(arcade.View):
                         # if player hit, enter cooldown
                         self.cooldown_time = COOLDOWN_DEFAULT
                         enemy.remove_from_sprite_lists()
-                        if not DEBUG:
-                            self.player_sprite.health -= 1
+                        self.player_sprite.health -= 1
                         # reset indicator bar fullness
-                        # TODO: Some jankiness causing crashes here
                         self.player_sprite.indicator_bar.fullness = (self.player_sprite.health / 10)
         else:
             # decrease cooldown time
@@ -503,28 +512,24 @@ class MyGame(arcade.View):
                 if bullet.top < 0:
                     bullet.remove_from_sprite_lists()
 
-            for bullet in self.player_bullet_list:
-                # bullet is above the screen
-                if bullet.bottom > SCREEN_HEIGHT:
+        # this doesn't need to be within cooldown timer because player can only shoot when not in cooldown
+        for bullet in self.player_bullet_list:
+            # bullet contact with enemy sprite
+            for enemy_row in self.enemy_list:
+                hits = arcade.check_for_collision_with_list(bullet, enemy_row)
+
+                if len(hits) > 0:
                     bullet.remove_from_sprite_lists()
+                    # if enemy hit, increase score
+                    self.score += bullet.damage
+                    for enemy_hit in hits:
+                        enemy_hit.hp -= bullet.damage
+                        if enemy_hit.hp <= 0:
+                            enemy_hit.remove_from_sprite_lists()
+            # bullet is above the screen
+            if bullet.bottom > SCREEN_HEIGHT:
+                bullet.remove_from_sprite_lists()
 
-        # Check if any enemies are in contact with the player
-        """
-        for enemy_row in self.enemy_list:
-            for enemy in enemy_row:
-                collisions = arcade.check_for_collision_with_list(enemy, self.player_list)
-
-                if len(collisions) > 0:
-                    enemy.remove_from_sprite_lists()
-                    # Explosion here
-                    if not DEBUG:
-                        self.player_sprite.health -= enemy.damage
-                    # reset indicator bar fullness
-                    # TODO: Some jankiness causing crashes here
-                    self.player_sprite.indicator_bar.fullness = (
-                            self.player_sprite.health / 5
-                    )
-        """
         # move enemy ships
         for enemy_row in self.enemy_list:
             enemy_row.update()
@@ -1157,7 +1162,7 @@ class MyGame(arcade.View):
         """
         called whenever a key on the keyboard is pressed.
         """
-        if key == 32:
+        if key == 32 and self.cooldown_time <= 0:
             # fire a weapon from current weapon of player at their location
             bullet = self.player_sprite.fire()
             self.player_bullet_list.append(bullet)
@@ -1191,16 +1196,16 @@ class MyGame(arcade.View):
         # pause button styling
         default_style = {
             "font_name": ("calibri", "arial"),
-            "font_size": 15,
-            "font_color": (54, 161, 42),
-            "border_width": 5,
-            "border_color": (54, 161, 42),
+            "font_size": 18,
+            "font_color": arcade.color.GREEN,
+            "border_width": 3,
+            "border_color": arcade.color.GREEN,
             "bg_color": (0, 0, 0),
-            "bg_color_hover": (43, 80, 227),
-            "border_color_hover": arcade.color.WHITE
+            "bg_color_hover": arcade.color.BARBIE_PINK,
+            "border_color_hover": arcade.color.BARBIE_PINK,
         }
 
-        pause_button = arcade.gui.UIFlatButton(text="||", width=40, height=60, style=default_style)
+        pause_button = arcade.gui.UIFlatButton(text="||", width=40, height=50, style=default_style)
 
         # event to pause game on click of button
         @pause_button.event("on_click")

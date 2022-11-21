@@ -1,6 +1,5 @@
 import arcade
 from typing import Tuple
-
 from weapon import Weapon
 
 SCREEN_WIDTH = 500
@@ -26,7 +25,6 @@ class Player(arcade.Sprite):
         )
 
     def update(self):
-        """ Move the player """
         # Move player.
         self.center_x += self.change_x
 
@@ -62,14 +60,14 @@ class IndicatorBar:
        :param int width: The width of the bar.
        :param int height: The height of the bar.
        :param int border_size: The size of the bar's border.
-       """
+    """
     def __init__(
         self,
         owner: Player,
         sprite_list: arcade.SpriteList,
         position: Tuple[float, float] = (0, 0),
         full_color: arcade.Color = arcade.color.GREEN,
-        background_color: arcade.Color = arcade.color.RED,
+        background_color: arcade.Color = arcade.color.BARBIE_PINK,
         width: int = 100,
         height: int = 5,
         border_size: int = 4,
@@ -132,9 +130,10 @@ class IndicatorBar:
         """Sets the fullness of the bar."""
         # Check if new_fullness if valid
         if not (0.0 <= new_fullness <= 1.0):
-            raise ValueError(
-                f"Got {new_fullness}, but fullness must be between 0.0 and 1.0."
-            )
+            if new_fullness < 0.0:
+                new_fullness = 0
+            if new_fullness > 1.0:
+                new_fullness = 1.0
 
         # Set the size of the bar
         self._fullness = new_fullness
