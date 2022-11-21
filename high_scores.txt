@@ -1,0 +1,5 @@
+JRK,18
+KNG,15
+DNW,7
+TCL,6
+HEL,4
