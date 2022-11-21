@@ -1225,6 +1225,8 @@ class EndScreen(arcade.View):
         self.logo.center_x = SCREEN_WIDTH/2
         self.logo.center_y = SCREEN_HEIGHT - 200
 
+        highscore.clear()
+
         try:
             file = open('high_scores.txt', 'r')
             lines = file.readlines()
@@ -1311,9 +1313,6 @@ class EndScreen(arcade.View):
         for i in range(len(highscore)):
             start_y -= 25
             arcade.draw_text(highscore[i][0], start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
-
-
-
 
 def main():
     """
