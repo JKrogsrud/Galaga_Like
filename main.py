@@ -28,6 +28,7 @@ COOLDOWN_DEFAULT = 3
 INDICATOR_BAR_OFFSET = 32
 
 highscore = []
+high_score = []
 defaultUsername = "AAA"
 
 # For testing and not dying
@@ -57,12 +58,26 @@ class StartButton(arcade.gui.UIFlatButton):
         game_view.setup()
         game_view.window.show_view(game_view)
 
-class EndButton(arcade.gui.UIFlatButton):
 
+class EndButton(arcade.gui.UIFlatButton):
+    """
+    EndButton = class for button to go to end screen
+    """
     def on_click(self, event: arcade.gui.UIOnClickEvent):
         game_view = EndScreen()
         game_view.setup()
         game_view.window.show_view(game_view)
+
+
+class ReturnStartButton(arcade.gui.UIFlatButton):
+    """
+    ReturnStartButton = class for returning to start screen from ending or paused
+    """
+    def on_click(self, event: arcade.gui.UIOnClickEvent):
+        start_view = StartScreen()
+        start_view.setup()
+        start_view.window.show_view(start_view)
+
 
 class StartScreen(arcade.View):
     """
@@ -114,7 +129,7 @@ class StartScreen(arcade.View):
 
 class PauseView(arcade.View):
     """
-    PauseView = class for pause view
+    PauseView = class for paused view
     """
     def __init__(self, game_view):
         super().__init__()
@@ -141,16 +156,15 @@ class PauseView(arcade.View):
             "border_color_pressed": (173, 27, 10),
         }
 
-        # button for resuming game
+        # button for resuming
         resume = arcade.gui.UIFlatButton(text="Resume Game", width=200, height=50, style=default_style)
 
         @resume.event("on_click")
         def on_click_settings(event):
             self.window.show_view(self.game_view)
-
         self.buttons.add(resume)
 
-        # button for restarting game
+        # button for restarting
         start_button = StartButton(text="Restart", width=200, height=50, style=default_style)
         self.buttons.add(start_button)
 
@@ -162,7 +176,6 @@ class PauseView(arcade.View):
             game = StartScreen()
             game.setup()
             game.window.show_view(game)
-
         self.buttons.add(main_menu)
 
         self.manager.add(
@@ -186,16 +199,39 @@ class PauseView(arcade.View):
 
 class EndScreen(arcade.View):
     """
-    EndScreen = class for the ending view
+    EndScreen = class for ending view
     """
-    def __init__(self):
+    def __init__(self, score):
         super().__init__()
-        self.logo = arcade.Sprite("Galaga.png", .15)
+        self.score = score
 
     def setup(self):
+        # function to sort scores
+        def sort_scores(s):
+            return s[0]
+
         self.logo = arcade.Sprite("Galaga.png", .15)
-        self.logo.center_x = SCREEN_WIDTH / 2
-        self.logo.center_y = SCREEN_HEIGHT - 200
+        self.logo.center_x = SCREEN_WIDTH/2
+        self.logo.center_y = SCREEN_HEIGHT - 100
+
+        highscore.clear()
+
+        # read the high scores from high_scores file and add to highscore list
+        try:
+            file = open('high_scores.txt', 'r')
+            lines = file.readlines()
+
+            for line in lines:
+                user = line.split(",")[0]
+                users_score = line.split(",")[1]
+
+                highscore.append((user, users_score))
+            file.close()
+        except FileNotFoundError:
+            print("File does not exist")
+
+        highscore.append((defaultUsername, self.score))
+        highscore.sort(key=sort_scores)
 
     def on_show_view(self):
         # sets up the end screen
@@ -204,8 +240,8 @@ class EndScreen(arcade.View):
         self.end_screen_alignment = arcade.gui.UIBoxLayout(space_between=20)
 
         default_style = {
-            "font_name": "Kenney Rocket Square",
-            "font_size": 10,
+            "font_name": ("calibri", "arial"),
+            "font_size": 15,
             "font_color": arcade.color.WHITE,
             "font_color_pressed": arcade.color.WHITE,
             "border_width": 5,
@@ -214,10 +250,9 @@ class EndScreen(arcade.View):
             "bg_color_pressed": (173, 27, 10),
             "bg_color_hover": (43, 80, 227),
             "border_color_hover": (173, 27, 10),
-            "border_color_pressed": (173, 27, 10),
+            "border_color_pressed": (173, 27, 10)
         }
 
-        # options on end screen are return to starting menu or play again
         return_button = ReturnStartButton(text="Return to Start", width=150, style=default_style)
         self.end_screen_alignment.add(return_button)
         replay_button = StartButton(text="Play Again", width=150, style=default_style)
@@ -227,6 +262,7 @@ class EndScreen(arcade.View):
             arcade.gui.UIAnchorWidget(
                 anchor_x="center_x",
                 anchor_y="center_y",
+                align_y=-250,
                 child=self.end_screen_alignment)
         )
 
@@ -234,7 +270,7 @@ class EndScreen(arcade.View):
         self.clear()
         self.manager.draw()
 
-        # draws GAME OVER and SCORE text
+        # draws GAME OVER text
         start_x = 0
         start_y = (SCREEN_HEIGHT / 2) + 50
         arcade.draw_text("GAME OVER", start_x, start_y, arcade.color.LIGHT_BLUE, 20, width=SCREEN_WIDTH, align="center")
@@ -242,7 +278,32 @@ class EndScreen(arcade.View):
         start_x -= 50
         start_y = (SCREEN_HEIGHT / 2) + 30
         arcade.draw_text("SCORE:", start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
+
+        start_x += 50
+        arcade.draw_text(self.score, start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
+
         self.logo.draw()
+
+        #for i in range(len(highscore)):
+         #   if self.score > int(highscore[i][1]) and (defaultUsername, str(self.score) + "\n") not in highscore:
+          #      highscore.insert(i, (defaultUsername, str(self.score) + "\n"))
+           #     highscore.pop()
+
+        file = open("high_scores.txt", 'w')
+        for l in range(len(highscore)):
+            file.write(highscore[l][0] + "," + str(highscore[l][1]))
+        file.close()
+
+        start_x += 80
+        for i in range(len(highscore)):
+            start_y -= 25
+            arcade.draw_text(highscore[i][1], start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
+
+        start_x -= 40
+        start_y += 125
+        for i in range(len(highscore)):
+            start_y -= 25
+            arcade.draw_text(highscore[i][0], start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
 
 
 class MyGame(arcade.View):
@@ -1141,178 +1202,6 @@ class MyGame(arcade.View):
         )
         self.pause_button_alignment.add(pause_button)
 
-class PauseView(arcade.View):
-    def __init__(self, game_view):
-        super().__init__()
-        self.game_view = game_view
-
-    def on_show_view(self):
-        #manager for buttons
-        self.manager = arcade.gui.UIManager()
-        self.manager.enable()
-        self.buttons = arcade.gui.UIBoxLayout(space_between=20)
-
-        #style for buttons
-        default_style = {
-            "font_name": ("Kenney Rocket Square"),
-            "font_size": 10,
-            "font_color": arcade.color.WHITE,
-            "font_color_pressed": arcade.color.WHITE,
-            "border_width": 5,
-            "border_color": None,
-            "bg_color": (43, 80, 227),
-            "bg_color_pressed": (173, 27, 10),
-            "bg_color_hover": (43, 80, 227),
-            "border_color_hover": (173, 27, 10),
-            "border_color_pressed": (173, 27, 10),
-        }
-
-        # button for resuming
-        resume = arcade.gui.UIFlatButton(text="Resume Game", width=200, height=50, style=default_style)
-        @resume.event("on_click")
-        def on_click_settings(event):
-            self.window.show_view(self.game_view)
-        self.buttons.add(resume)
-
-        # button for restarting
-        start_button = StartButton(text="Restart", width=200, height=50, style=default_style)
-        self.buttons.add(start_button)
-
-        #button for returning to main menu
-        main_menu = arcade.gui.UIFlatButton(text="Main Menu", width=200, height=50, style=default_style)
-        @main_menu.event("on_click")
-        def on_click_settings(event):
-            game = StartScreen()
-            game.setup()
-            game.window.show_view(game)
-        self.buttons.add(main_menu)
-
-
-
-        self.manager.add(
-            arcade.gui.UIAnchorWidget(
-                anchor_x="center_x",
-                anchor_y="center_y",
-                child=self.buttons)
-        )
-    def on_draw(self):
-        self.clear()
-        self.manager.draw()
-        arcade.draw_text("PAUSED",
-                         SCREEN_WIDTH / 2,
-                         SCREEN_HEIGHT / 2 + 200,
-                         (43, 80, 227),
-                         font_size=40,
-                         anchor_x="center",
-                         font_name="Kenney Rocket Square")
-
-
-class ReturnStartButton(arcade.gui.UIFlatButton):
-    """ Return to start screen"""
-
-    def on_click(self, event: arcade.gui.UIOnClickEvent):
-        start_view = StartScreen()
-        start_view.setup()
-        start_view.window.show_view(start_view)
-
-class EndScreen(arcade.View):
-    def __init__(self, score):
-        super().__init__()
-        self.score = score
-
-    def setup(self):
-        self.logo = arcade.Sprite("Galaga.png", .15)
-        self.logo.center_x = SCREEN_WIDTH/2
-        self.logo.center_y = SCREEN_HEIGHT - 200
-
-        highscore.clear()
-
-        try:
-            file = open('high_scores.txt', 'r')
-            lines = file.readlines()
-
-            for line in lines:
-                user = line.split(",")[0]
-                users_score = line.split(",")[1]
-
-                highscore.append((user, users_score))
-            file.close()
-        except FileNotFoundError:
-            print("File does not exist")
-
-    def on_show_view(self):
-        # sets up the end screen
-
-        self.manager = arcade.gui.UIManager()
-        self.manager.enable()
-        self.end_screen_alignment = arcade.gui.UIBoxLayout(space_between=20)
-
-        default_style = {
-            "font_name": ("calibri", "arial"),
-            "font_size": 15,
-            "font_color": arcade.color.WHITE,
-            "font_color_pressed": arcade.color.WHITE,
-            "border_width": 5,
-            "border_color": None,
-            "bg_color": (43, 80, 227),
-            "bg_color_pressed": (173, 27, 10),
-            "bg_color_hover": (43, 80, 227),
-            "border_color_hover": (173, 27, 10),
-            "border_color_pressed": (173, 27, 10)
-        }
-
-        return_button = ReturnStartButton(text="Return to Start", width=150, style=default_style)
-        self.end_screen_alignment.add(return_button)
-        replay_button = StartButton(text="Play Again", width=150, style=default_style)
-        self.end_screen_alignment.add(replay_button)
-
-        self.manager.add(
-            arcade.gui.UIAnchorWidget(
-                anchor_x="center_x",
-                anchor_y="center_y",
-                align_y = -250,
-                child=self.end_screen_alignment)
-        )
-
-    def on_draw(self):
-        self.clear()
-        self.manager.draw()
-
-        # draws GAME OVER text
-        start_x = 0
-        start_y = (SCREEN_HEIGHT / 2) + 50
-        arcade.draw_text("GAME OVER", start_x, start_y, arcade.color.LIGHT_BLUE, 20, width=SCREEN_WIDTH, align="center")
-
-        start_x -= 50
-        start_y = (SCREEN_HEIGHT / 2) + 30
-        arcade.draw_text("SCORE:", start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
-
-        start_x += 50
-        arcade.draw_text(self.score, start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
-
-        self.logo.draw()
-
-        for i in range(len(highscore)):
-            if self.score > int(highscore[i][1]) and (defaultUsername, str(self.score) + "\n") not in highscore:
-                highscore.insert(i, (defaultUsername, str(self.score) + "\n"))
-                highscore.pop()
-
-
-        file = open("high_scores.txt", 'w')
-        for l in range(len(highscore)):
-            file.write(highscore[l][0] + "," + str(highscore[l][1]))
-        file.close()
-
-        start_x += 80
-        for i in range(len(highscore)):
-            start_y -= 25
-            arcade.draw_text(highscore[i][1], start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
-
-        start_x -= 40
-        start_y += 125
-        for i in range(len(highscore)):
-            start_y -= 25
-            arcade.draw_text(highscore[i][0], start_x, start_y, arcade.color.WHITE, 10, width=SCREEN_WIDTH, align="center")
 
 def main():
     """
