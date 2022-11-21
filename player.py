@@ -1,8 +1,6 @@
 import arcade
 from typing import Tuple
-
 from weapon import Weapon
-from bullet import Bullet
 
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 700
@@ -11,7 +9,7 @@ SCREEN_HEIGHT = 700
 class Player(arcade.Sprite):
     def __init__(self, bar_list: arcade.SpriteList,
                  filename="Player.png",
-                 health=5,
+                 health=10,
                  weapon=Weapon(),
                  movement_speed=10,
                  ):
@@ -27,8 +25,7 @@ class Player(arcade.Sprite):
         )
 
     def update(self):
-        """ Move the player """
-        # Move player.
+        # Move player
         self.center_x += self.change_x
 
         # Check for out-of-bounds
@@ -54,24 +51,23 @@ class Player(arcade.Sprite):
 class IndicatorBar:
     """
        Represents a bar which can display information about a sprite.
-
        :param Player owner: The owner of this indicator bar.
        :param arcade.SpriteList sprite_list: The sprite list used to draw the indicator
-       bar components.
+        bar components.
        :param Tuple[float, float] position: The initial position of the bar.
        :param arcade.Color full_color: The color of the bar.
        :param arcade.Color background_color: The background color of the bar.
        :param int width: The width of the bar.
        :param int height: The height of the bar.
        :param int border_size: The size of the bar's border.
-       """
+    """
     def __init__(
         self,
         owner: Player,
         sprite_list: arcade.SpriteList,
         position: Tuple[float, float] = (0, 0),
         full_color: arcade.Color = arcade.color.GREEN,
-        background_color: arcade.Color = arcade.color.RED,
+        background_color: arcade.Color = arcade.color.BARBIE_PINK,
         width: int = 100,
         height: int = 5,
         border_size: int = 4,
@@ -104,9 +100,9 @@ class IndicatorBar:
 
         # Set the fullness and position of the bar
         self.fullness: float = 1.0
-        self._center_x, self._center_y = (280, 665)
-        self.background_box.position = (280, 665)
-        self.full_box.position = (280, 665)
+        self._center_x, self._center_y = (275, 665)
+        self.background_box.position = (275, 665)
+        self.full_box.position = (275, 665)
 
         # Make sure full_box is to the left of the bar instead of the middle
         self.full_box.left = self._center_x - (self._box_width // 2)
@@ -134,9 +130,10 @@ class IndicatorBar:
         """Sets the fullness of the bar."""
         # Check if new_fullness if valid
         if not (0.0 <= new_fullness <= 1.0):
-            raise ValueError(
-                f"Got {new_fullness}, but fullness must be between 0.0 and 1.0."
-            )
+            if new_fullness < 0.0:
+                new_fullness = 0
+            if new_fullness > 1.0:
+                new_fullness = 1.0
 
         # Set the size of the bar
         self._fullness = new_fullness
@@ -153,4 +150,3 @@ class IndicatorBar:
     def position(self) -> Tuple[float, float]:
         """Returns the current position of the bar."""
         return self._center_x, self._center_y
-

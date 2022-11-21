@@ -6,11 +6,16 @@ import math
 Weapon class will handle the starting position and types of bullets
 that will be used in the game.
 
-It should know where the player / enemy sprite is so pass in those locations
+:param image:  the image file used for the weapon if it has one (unused but would be implemented with weapon powerups)
+:param friendly: a boolean as to whether or not the bullets fired from this weapon harm the player
+:param requires_ammo: a boolean as to whether or not the weapon requires ammunition to fire
+:param ammo: The amount of ammo in the gun
+:param bullet_type: Bullet class fired by this weapon
+:param bullet-speed: the speed of the bullets that are fired
 """
 
 
-class Weapon():
+class Weapon:
     def __init__(self, image=None,
                  friendly=True,
                  requires_ammo=False,
