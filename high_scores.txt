@@ -1,0 +1,5 @@
+EJP,25
+WOW,11
+BDW,10
+LOL,8
+KFP,2
