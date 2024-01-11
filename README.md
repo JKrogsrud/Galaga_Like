@@ -2,7 +2,7 @@
 
 ### Contributions
 
-Contact information for contributors to this project has been mostly lost due to UVM's transfer to a different student repository. I primarily worked on the backend and logic behind the game itself with the aid of pygame tutorials.
+I primarily worked on the backend and logic behind the game itself with the aid of pygame tutorials.
 You can see my contributions in battle_line.py, bullet.py, enemy.py, weapon.py, and game logic in main.py.
 
 ### Project Description
