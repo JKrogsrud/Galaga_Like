@@ -1,3 +1,14 @@
+## Galaga Like using pygame
+
+### Contributions
+
+Contact information for contributors to this project has been mostly lost due to UVM's transfer to a different student repository. I primarily worked on the backend and logic behind the game itself with the aid of pygame tutorials.
+You can see my contributions in battle_line.py, bullet.py, enemy.py, weapon.py, and game logic in main.py.
+
+### Project Description
+
+This project was a group collaboration with a focus on learning how to work well on a team, with individuals working on different aspects of the game. Ultimately the goal was to create a game similar to the arcade game Galaga, creating one to three levels of increasing difficulty.
+
 ## File Overview
 ### python files:
 battle_line.py </br>
